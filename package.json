@@ -1,0 +1,49 @@
+{
+  "name": "@xilution/todd-coin-brokers",
+  "version": "1.0.0",
+  "description": "The Todd Coin Cryptocurrency Brokers",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "tag": "latest"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf ./dist",
+    "format": "prettier --write .",
+    "start": "node ./dist/index.js",
+    "watch": "nodemon --watch src -e ts --exec \"npm run build\"",
+    "verify": "echo \"nothing to do yet\"",
+    "release": "npm release"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xilution/todd-coin-brokers"
+  },
+  "bugs": {
+    "url": "https://github.com/xilution/todd-coin-brokers/issues"
+  },
+  "homepage": "https://github.com/xilution/todd-coin-brokers",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "main": "./dist/index.js",
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "@types/pg": "^8.6.5",
+    "lodash": "^4.17.21",
+    "pg": "^8.7.3",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.18.0",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.23",
+    "nodemon": "^2.0.15",
+    "prettier": "^2.5.1",
+    "typescript": "^4.6.2"
+  },
+  "author": "Todd Brunia <tbrunia@gmail.com> (http://www.github.com/tbrunia)",
+  "license": "MIT",
+  "private": false
+}
