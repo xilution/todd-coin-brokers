@@ -1,7 +1,10 @@
-import { Block, Transaction } from "../types";
+import { Block, Transaction } from "@xilution/todd-coin-types";
 import { SequelizeClient } from "./sequelize-client";
 import { v4 } from "uuid";
-import { MAX_TRANSACTIONS_PER_BLOCK, MINING_REWARD } from "../constants";
+import {
+  MAX_TRANSACTIONS_PER_BLOCK,
+  MINING_REWARD,
+} from "@xilution/todd-coin-constants";
 import { getBlockTransactions } from "./transactions-broker";
 
 const map = (dbBlock): Block => ({
@@ -128,4 +131,4 @@ export default {
   getBlockById,
   getBlocks,
   createBlock,
-}
+};

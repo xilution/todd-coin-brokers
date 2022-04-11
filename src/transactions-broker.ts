@@ -1,4 +1,4 @@
-import { Transaction } from "../types";
+import { Transaction } from "@xilution/todd-coin-types";
 import { SequelizeClient } from "./sequelize-client";
 import { v4 } from "uuid";
 import { buildWhere } from "./broker-utils";
@@ -223,5 +223,4 @@ export default {
   getSignedTransactions,
   getBlockTransactions,
   createPendingTransaction,
-
-}
+};

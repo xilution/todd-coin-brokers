@@ -1,12 +1,8 @@
 import * as sequelize from "sequelize";
-import { Block, Participant, Transaction } from "../types";
-import {
-  createGenesisBlock,
-  createGenesisParticipant,
-} from "../utils/block-utils";
+import { Block, Participant, Transaction } from "@xilution/todd-coin-types";
+import { blockUtils } from "@xilution/todd-coin-utils";
 
 const { Client } = require("pg");
-
 export class SequelizeClient {
   private sequelize: sequelize.Sequelize;
   private nodeModel;
@@ -174,7 +170,7 @@ export class SequelizeClient {
 
     await this.sequelize.sync({ force: false, alter: true });
 
-    const genesisParticipant: Participant = createGenesisParticipant();
+    const genesisParticipant: Participant = blockUtils.createGenesisParticipant();
 
     await this.participantModel.findOrCreate({
       where: {
@@ -186,7 +182,7 @@ export class SequelizeClient {
       },
     });
 
-    const genesisBlock: Block = createGenesisBlock();
+    const genesisBlock: Block = blockUtils.createGenesisBlock();
 
     await this.blockModel.findOrCreate({
       where: {

@@ -1,4 +1,4 @@
-import { Node } from "../types";
+import { Node } from "@xilution/todd-coin-types";
 import { SequelizeClient } from "./sequelize-client";
 import { v4 } from "uuid";
 
@@ -69,4 +69,4 @@ export default {
   getNodeById,
   getNodes,
   createNode,
-}
+};

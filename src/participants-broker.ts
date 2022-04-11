@@ -1,4 +1,4 @@
-import { Participant } from "../types";
+import { Participant } from "@xilution/todd-coin-types";
 import { SequelizeClient } from "./sequelize-client";
 import { Model } from "sequelize";
 import { v4 } from "uuid";
@@ -110,4 +110,4 @@ export default {
   getParticipantByPublicKey,
   getParticipants,
   createParticipant,
-}
+};
