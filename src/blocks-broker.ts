@@ -1,13 +1,14 @@
 import { Block, Transaction } from "@xilution/todd-coin-types";
-import { SequelizeClient } from "./sequelize-client";
+import { DbClient } from "./db-client";
 import { v4 } from "uuid";
 import {
   MAX_TRANSACTIONS_PER_BLOCK,
   MINING_REWARD,
 } from "@xilution/todd-coin-constants";
 import { getBlockTransactions } from "./transactions-broker";
+import { BlockInstance } from "./types";
 
-const map = (dbBlock): Block => ({
+const map = (dbBlock: BlockInstance): Block => ({
   id: dbBlock.id,
   createdAt: dbBlock.createdAt,
   updatedAt: dbBlock.updatedAt,
@@ -18,10 +19,14 @@ const map = (dbBlock): Block => ({
 });
 
 export const getBlockById = async (
-  sequelizeClient: SequelizeClient,
+  dbClient: DbClient,
   id: string
 ): Promise<Block | undefined> => {
-  const blockModel = sequelizeClient.getBlockModel();
+  const blockModel = dbClient.sequelize?.models.Block;
+
+  if (blockModel === undefined) {
+    return;
+  }
 
   const model = await blockModel.findByPk(id);
 
@@ -32,7 +37,7 @@ export const getBlockById = async (
   const dbBlock = model.get();
 
   const { rows } = await getBlockTransactions(
-    sequelizeClient,
+    dbClient,
     0,
     MAX_TRANSACTIONS_PER_BLOCK,
     dbBlock.id
@@ -42,11 +47,15 @@ export const getBlockById = async (
 };
 
 export const getBlocks = async (
-  sequelizeClient: SequelizeClient,
+  dbClient: DbClient,
   pageNumber: number,
   pageSize: number
 ): Promise<{ count: number; rows: Block[] }> => {
-  const blockModel = sequelizeClient.getBlockModel();
+  const blockModel = dbClient.sequelize?.models.Block;
+
+  if (blockModel === undefined) {
+    return { count: 0, rows: [] };
+  }
 
   const { count, rows } = await blockModel.findAndCountAll({
     offset: pageNumber * pageSize,
@@ -61,7 +70,7 @@ export const getBlocks = async (
         const dbBlock = model.get();
 
         const { rows } = await getBlockTransactions(
-          sequelizeClient,
+          dbClient,
           0,
           MAX_TRANSACTIONS_PER_BLOCK,
           dbBlock.id
@@ -74,12 +83,17 @@ export const getBlocks = async (
 };
 
 export const createBlock = async (
-  sequelizeClient: SequelizeClient,
+  dbClient: DbClient,
   newBlock: Block,
   minerPublicKey: string
-): Promise<Block> => {
-  return await sequelizeClient.transaction<Block>(async () => {
-    const blockModel = sequelizeClient.getBlockModel();
+): Promise<Block | undefined> => {
+  return await dbClient.transaction<Block | undefined>(async () => {
+    const blockModel = dbClient.sequelize?.models.Block;
+    const transactionModel = dbClient.sequelize?.models.Transaction;
+
+    if (blockModel === undefined || transactionModel === undefined) {
+      return;
+    }
 
     const model = await blockModel.create({
       id: newBlock.id || v4(),
@@ -87,8 +101,6 @@ export const createBlock = async (
       previousHash: newBlock.previousHash,
       hash: newBlock.hash,
     });
-
-    const transactionModel = sequelizeClient.getTransactionModel();
 
     await Promise.all(
       newBlock.transactions.map((transaction: Transaction) => {
@@ -117,7 +129,7 @@ export const createBlock = async (
     const dbBlock = model.get();
 
     const { rows } = await getBlockTransactions(
-      sequelizeClient,
+      dbClient,
       0,
       MAX_TRANSACTIONS_PER_BLOCK,
       dbBlock.id
@@ -125,10 +137,4 @@ export const createBlock = async (
 
     return { ...map(dbBlock), transactions: rows };
   });
-};
-
-export default {
-  getBlockById,
-  getBlocks,
-  createBlock,
 };

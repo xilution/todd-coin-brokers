@@ -1,9 +1,11 @@
 import { Transaction } from "@xilution/todd-coin-types";
-import { SequelizeClient } from "./sequelize-client";
+import { DbClient } from "./db-client";
 import { v4 } from "uuid";
-import { buildWhere } from "./broker-utils";
+import { TransactionInstance } from "./types";
+import _ from "lodash";
+import { WhereOptions } from "sequelize";
 
-const map = (dbTransaction): Transaction => ({
+const map = (dbTransaction: TransactionInstance): Transaction => ({
   id: dbTransaction.id,
   createdAt: dbTransaction.createdAt,
   updatedAt: dbTransaction.updatedAt,
@@ -15,10 +17,14 @@ const map = (dbTransaction): Transaction => ({
 });
 
 export const getPendingTransactionById = async (
-  sequelizeClient: SequelizeClient,
+  dbClient: DbClient,
   pendingTransactionId: string
 ): Promise<Transaction | undefined> => {
-  const transactionModel = sequelizeClient.getTransactionModel();
+  const transactionModel = dbClient.sequelize?.models.Transaction;
+
+  if (transactionModel === undefined) {
+    return;
+  }
 
   const model = await transactionModel.findByPk(pendingTransactionId);
 
@@ -36,10 +42,14 @@ export const getPendingTransactionById = async (
 };
 
 export const getSignedTransactionById = async (
-  sequelizeClient: SequelizeClient,
+  dbClient: DbClient,
   signedTransactionId: string
 ): Promise<Transaction | undefined> => {
-  const transactionModel = sequelizeClient.getTransactionModel();
+  const transactionModel = dbClient.sequelize?.models.Transaction;
+
+  if (transactionModel === undefined) {
+    return;
+  }
 
   const model = await transactionModel.findByPk(signedTransactionId);
 
@@ -57,11 +67,15 @@ export const getSignedTransactionById = async (
 };
 
 export const getBlockTransactionById = async (
-  sequelizeClient: SequelizeClient,
+  dbClient: DbClient,
   blockId: string,
   blockTransactionId: string
 ): Promise<Transaction | undefined> => {
-  const transactionModel = sequelizeClient.getTransactionModel();
+  const transactionModel = dbClient.sequelize?.models.Transaction;
+
+  if (transactionModel === undefined) {
+    return;
+  }
 
   const model = await transactionModel.findByPk(blockTransactionId);
 
@@ -79,20 +93,22 @@ export const getBlockTransactionById = async (
 };
 
 export const getPendingTransactions = async (
-  sequelizeClient: SequelizeClient,
+  dbClient: DbClient,
   pageNumber: number,
   pageSize: number,
   from?: string,
   to?: string
 ): Promise<{ count: number; rows: Transaction[] }> => {
-  const transactionModel = sequelizeClient.getTransactionModel();
+  const transactionModel = dbClient.sequelize?.models.Transaction;
+
+  if (transactionModel === undefined) {
+    return { count: 0, rows: [] };
+  }
+
   const { count, rows } = await transactionModel.findAndCountAll({
-    where: buildWhere(
-      { from, to },
-      {
-        type: "pending",
-      }
-    ),
+    where: _.pickBy({ from, to, type: "pending" }, _.identity) as WhereOptions<{
+      publicKey: string;
+    }>,
     offset: pageNumber * pageSize,
     order: [["createdAt", "ASC"]],
     limit: pageSize,
@@ -109,21 +125,22 @@ export const getPendingTransactions = async (
 };
 
 export const getSignedTransactions = async (
-  sequelizeClient: SequelizeClient,
+  dbClient: DbClient,
   pageNumber: number,
   pageSize: number,
   from?: string,
   to?: string
 ): Promise<{ count: number; rows: Transaction[] }> => {
-  const transactionModel = sequelizeClient.getTransactionModel();
+  const transactionModel = dbClient.sequelize?.models.Transaction;
+
+  if (transactionModel === undefined) {
+    return { count: 0, rows: [] };
+  }
 
   const { count, rows } = await transactionModel.findAndCountAll({
-    where: buildWhere(
-      { from, to },
-      {
-        type: "signed",
-      }
-    ),
+    where: _.pickBy({ from, to, type: "signed" }, _.identity) as WhereOptions<{
+      publicKey: string;
+    }>,
     offset: pageNumber * pageSize,
     order: [["createdAt", "ASC"]],
     limit: pageSize,
@@ -140,12 +157,16 @@ export const getSignedTransactions = async (
 };
 
 export const getBlockTransactions = async (
-  sequelizeClient: SequelizeClient,
+  dbClient: DbClient,
   pageNumber: number,
   pageSize: number,
   blockId: string
 ): Promise<{ count: number; rows: Transaction[] }> => {
-  const transactionModel = sequelizeClient.getTransactionModel();
+  const transactionModel = dbClient.sequelize?.models.Transaction;
+
+  if (transactionModel === undefined) {
+    return { count: 0, rows: [] };
+  }
 
   const { count, rows } = await transactionModel.findAndCountAll({
     where: {
@@ -168,10 +189,14 @@ export const getBlockTransactions = async (
 };
 
 export const createPendingTransaction = async (
-  sequelizeClient: SequelizeClient,
+  dbClient: DbClient,
   newPendingTransaction: Transaction
-): Promise<Transaction> => {
-  const transactionModel = sequelizeClient.getTransactionModel();
+): Promise<Transaction | undefined> => {
+  const transactionModel = dbClient.sequelize?.models.Transaction;
+
+  if (transactionModel === undefined) {
+    return;
+  }
 
   const model = await transactionModel.create({
     id: newPendingTransaction.id || v4(),
@@ -189,10 +214,14 @@ export const createPendingTransaction = async (
 };
 
 export const createSignedTransaction = async (
-  sequelizeClient: SequelizeClient,
+  dbClient: DbClient,
   newSignedTransaction: Transaction
-): Promise<Transaction> => {
-  const transactionModel = sequelizeClient.getTransactionModel();
+): Promise<Transaction | undefined> => {
+  const transactionModel = dbClient.sequelize?.models.Transaction;
+
+  if (transactionModel === undefined) {
+    return;
+  }
 
   const { id, signature } = newSignedTransaction;
 
@@ -210,17 +239,11 @@ export const createSignedTransaction = async (
 
   const model = await transactionModel.findByPk(id);
 
+  if (!model) {
+    return;
+  }
+
   const dbTransaction = model.get();
 
   return map(dbTransaction);
-};
-
-export default {
-  getPendingTransactionById,
-  getSignedTransactionById,
-  getBlockTransactionById,
-  getPendingTransactions,
-  getSignedTransactions,
-  getBlockTransactions,
-  createPendingTransaction,
 };

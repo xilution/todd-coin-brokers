@@ -1,11 +1,11 @@
-import { Participant } from "@xilution/todd-coin-types";
-import { SequelizeClient } from "./sequelize-client";
-import { Model } from "sequelize";
+import { Participant, Roles } from "@xilution/todd-coin-types";
+import { DbClient } from "./db-client";
+import { Model, WhereOptions } from "sequelize";
 import { v4 } from "uuid";
 import _ from "lodash";
-import { buildWhere } from "./broker-utils";
+import { ParticipantInstance } from "./types";
 
-const map = (dbParticipant): Participant => ({
+const map = (dbParticipant: ParticipantInstance): Participant => ({
   id: dbParticipant.id,
   createdAt: dbParticipant.createdAt,
   updatedAt: dbParticipant.createdAt,
@@ -14,14 +14,18 @@ const map = (dbParticipant): Participant => ({
   email: dbParticipant.email,
   phone: dbParticipant.phone,
   key: { public: dbParticipant.publicKey },
-  roles: dbParticipant.roles,
+  roles: dbParticipant.roles as Roles[],
 });
 
 export const getParticipantById = async (
-  sequelizeClient: SequelizeClient,
+  dbClient: DbClient,
   id: string
 ): Promise<Participant | undefined> => {
-  const participantModel = sequelizeClient.getParticipantModel();
+  const participantModel = dbClient.sequelize?.models.Participant;
+
+  if (participantModel === undefined) {
+    return;
+  }
 
   const model = await participantModel.findByPk(id);
 
@@ -35,10 +39,14 @@ export const getParticipantById = async (
 };
 
 export const getParticipantByPublicKey = async (
-  sequelizeClient: SequelizeClient,
+  dbClient: DbClient,
   publicKey: string
 ): Promise<Participant | undefined> => {
-  const participantModel = sequelizeClient.getParticipantModel();
+  const participantModel = dbClient.sequelize?.models.Participant;
+
+  if (participantModel === undefined) {
+    return;
+  }
 
   const models: Model[] = await participantModel.findAll({
     where: {
@@ -54,21 +62,31 @@ export const getParticipantByPublicKey = async (
 
   const model = _.first(models);
 
+  if (model === undefined) {
+    return;
+  }
+
   const dbParticipant = model.get();
 
   return map(dbParticipant);
 };
 
 export const getParticipants = async (
-  sequelizeClient: SequelizeClient,
+  dbClient: DbClient,
   pageNumber: number,
   pageSize: number,
   publicKey?: string
 ): Promise<{ count: number; rows: Participant[] }> => {
-  const participantModel = sequelizeClient.getParticipantModel();
+  const participantModel = dbClient.sequelize?.models.Participant;
+
+  if (participantModel === undefined) {
+    return { count: 0, rows: [] };
+  }
 
   const { count, rows } = await participantModel.findAndCountAll({
-    where: buildWhere({ publicKey }),
+    where: _.pickBy({ publicKey }, _.identity) as WhereOptions<{
+      publicKey: string;
+    }>,
     offset: pageNumber * pageSize,
     order: [["createdAt", "ASC"]],
     limit: pageSize,
@@ -85,10 +103,14 @@ export const getParticipants = async (
 };
 
 export const createParticipant = async (
-  sequelizeClient: SequelizeClient,
+  dbClient: DbClient,
   newParticipant: Participant
-): Promise<Participant> => {
-  const participantModel = sequelizeClient.getParticipantModel();
+): Promise<Participant | undefined> => {
+  const participantModel = dbClient.sequelize?.models.Participant;
+
+  if (participantModel === undefined) {
+    return;
+  }
 
   const model = await participantModel.create({
     id: newParticipant.id || v4(),
@@ -103,11 +125,4 @@ export const createParticipant = async (
   const dbParticipant = model.get();
 
   return map(dbParticipant);
-};
-
-export default {
-  getParticipantById,
-  getParticipantByPublicKey,
-  getParticipants,
-  createParticipant,
 };

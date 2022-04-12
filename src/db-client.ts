@@ -1,14 +1,16 @@
-import * as sequelize from "sequelize";
+import sequelize, { DataTypes, Sequelize } from "sequelize";
 import { Block, Participant, Transaction } from "@xilution/todd-coin-types";
 import { blockUtils } from "@xilution/todd-coin-utils";
+import { Client } from "pg";
+import {
+  BlockInstance,
+  NodeInstance,
+  ParticipantInstance,
+  TransactionInstance,
+} from "./types";
 
-const { Client } = require("pg");
-export class SequelizeClient {
-  private sequelize: sequelize.Sequelize;
-  private nodeModel;
-  private participantModel;
-  private transactionModel;
-  private blockModel;
+export class DbClient {
+  public sequelize: Sequelize | undefined;
 
   async init(
     database: string,
@@ -30,25 +32,25 @@ export class SequelizeClient {
     } catch (error) {
       console.error(error);
     } finally {
-      await client.end();
+      await client?.end();
     }
 
-    this.sequelize = new sequelize.Sequelize(database, username, password, {
+    this.sequelize = new Sequelize(database, username, password, {
       host,
       port,
       dialect: "postgres",
     });
 
-    this.nodeModel = this.sequelize.define(
+    this.sequelize.define<NodeInstance>(
       "Node",
       {
         id: {
-          type: sequelize.DataTypes.STRING,
+          type: DataTypes.STRING,
           allowNull: false,
           primaryKey: true,
         },
         baseUrl: {
-          type: sequelize.DataTypes.STRING,
+          type: DataTypes.STRING,
           allowNull: false,
         },
       },
@@ -57,36 +59,36 @@ export class SequelizeClient {
       }
     );
 
-    this.participantModel = this.sequelize.define(
+    this.sequelize.define<ParticipantInstance>(
       "Participant",
       {
         id: {
-          type: sequelize.DataTypes.STRING,
+          type: DataTypes.STRING,
           allowNull: false,
           primaryKey: true,
         },
         firstName: {
-          type: sequelize.DataTypes.STRING,
+          type: DataTypes.STRING,
           allowNull: true,
         },
         lastName: {
-          type: sequelize.DataTypes.STRING,
+          type: DataTypes.STRING,
           allowNull: true,
         },
         email: {
-          type: sequelize.DataTypes.STRING,
+          type: DataTypes.STRING,
           allowNull: true,
         },
         phone: {
-          type: sequelize.DataTypes.STRING,
+          type: DataTypes.STRING,
           allowNull: true,
         },
         publicKey: {
-          type: sequelize.DataTypes.STRING,
+          type: DataTypes.STRING,
           allowNull: false,
         },
         roles: {
-          type: sequelize.DataTypes.ARRAY(sequelize.DataTypes.STRING),
+          type: DataTypes.ARRAY(DataTypes.STRING),
           allowNull: false,
         },
       },
@@ -95,41 +97,41 @@ export class SequelizeClient {
       }
     );
 
-    this.transactionModel = this.sequelize.define(
+    this.sequelize.define<TransactionInstance>(
       "Transaction",
       {
         id: {
-          type: sequelize.DataTypes.STRING,
+          type: DataTypes.STRING,
           allowNull: false,
           primaryKey: true,
         },
         type: {
-          type: sequelize.DataTypes.STRING,
+          type: DataTypes.STRING,
           values: ["pending", "signed", "block"],
           allowNull: false,
         },
         blockId: {
-          type: sequelize.DataTypes.STRING,
+          type: DataTypes.STRING,
           allowNull: true,
         },
         from: {
-          type: sequelize.DataTypes.STRING,
+          type: DataTypes.STRING,
           allowNull: true,
         },
         to: {
-          type: sequelize.DataTypes.STRING,
+          type: DataTypes.STRING,
           allowNull: false,
         },
         amount: {
-          type: sequelize.DataTypes.BIGINT,
+          type: DataTypes.BIGINT,
           allowNull: false,
         },
         description: {
-          type: sequelize.DataTypes.STRING,
+          type: DataTypes.STRING,
           allowNull: false,
         },
         signature: {
-          type: sequelize.DataTypes.STRING,
+          type: DataTypes.STRING,
           allowNull: true,
         },
       },
@@ -138,24 +140,24 @@ export class SequelizeClient {
       }
     );
 
-    this.blockModel = this.sequelize.define(
+    this.sequelize.define<BlockInstance>(
       "Block",
       {
         id: {
-          type: sequelize.DataTypes.STRING,
+          type: DataTypes.STRING,
           allowNull: false,
           primaryKey: true,
         },
         nonce: {
-          type: sequelize.DataTypes.INTEGER,
+          type: DataTypes.INTEGER,
           allowNull: false,
         },
         previousHash: {
-          type: sequelize.DataTypes.STRING,
+          type: DataTypes.STRING,
           allowNull: false,
         },
         hash: {
-          type: sequelize.DataTypes.STRING,
+          type: DataTypes.STRING,
           allowNull: false,
         },
       },
@@ -164,15 +166,16 @@ export class SequelizeClient {
       }
     );
 
-    this.blockModel.hasMany(this.transactionModel, {
+    this.sequelize.models.Block.hasMany(this.sequelize.models.Transaction, {
       foreignKey: "blockId",
     });
 
     await this.sequelize.sync({ force: false, alter: true });
 
-    const genesisParticipant: Participant = blockUtils.createGenesisParticipant();
+    const genesisParticipant: Participant =
+      blockUtils.createGenesisParticipant();
 
-    await this.participantModel.findOrCreate({
+    await this.sequelize.models.Participant.findOrCreate({
       where: {
         id: genesisParticipant.id,
       },
@@ -184,7 +187,7 @@ export class SequelizeClient {
 
     const genesisBlock: Block = blockUtils.createGenesisBlock();
 
-    await this.blockModel.findOrCreate({
+    await this.sequelize.models.Block.findOrCreate({
       where: {
         id: genesisBlock.id,
       },
@@ -197,7 +200,7 @@ export class SequelizeClient {
 
     await Promise.all(
       genesisBlockTransactions.map(async (transaction: Transaction) => {
-        return await this.transactionModel.findOrCreate({
+        return this.sequelize?.models.Transaction?.findOrCreate({
           where: {
             id: transaction.id,
           },
@@ -213,25 +216,9 @@ export class SequelizeClient {
     console.log("All models were synchronized successfully.");
   }
 
-  getNodeModel() {
-    return this.nodeModel;
-  }
-
-  getParticipantModel() {
-    return this.participantModel;
-  }
-
-  getTransactionModel() {
-    return this.transactionModel;
-  }
-
-  getBlockModel() {
-    return this.blockModel;
-  }
-
   async transaction<T>(
     autoCallback: (t: sequelize.Transaction) => PromiseLike<T>
-  ): Promise<T> {
-    return await this.sequelize.transaction<T>(autoCallback);
+  ): Promise<T | undefined> {
+    return await this.sequelize?.transaction<T>(autoCallback);
   }
 }

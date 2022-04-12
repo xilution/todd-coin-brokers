@@ -1,8 +1,10 @@
 import { Node } from "@xilution/todd-coin-types";
-import { SequelizeClient } from "./sequelize-client";
+import { DbClient } from "./db-client";
 import { v4 } from "uuid";
+import { NodeInstance } from "./types";
+import { Model } from "sequelize";
 
-const map = (dbNode): Node => ({
+const map = (dbNode: NodeInstance): Node => ({
   id: dbNode.id,
   createdAt: dbNode.createdAt,
   updatedAt: dbNode.updatedAt,
@@ -10,10 +12,14 @@ const map = (dbNode): Node => ({
 });
 
 export const getNodeById = async (
-  sequelizeClient: SequelizeClient,
+  dbClient: DbClient,
   id: string
 ): Promise<Node | undefined> => {
-  const nodeModel = sequelizeClient.getNodeModel();
+  const nodeModel = dbClient.sequelize?.models.Node;
+
+  if (nodeModel === undefined) {
+    return;
+  }
 
   const model = await nodeModel.findByPk(id);
 
@@ -27,11 +33,15 @@ export const getNodeById = async (
 };
 
 export const getNodes = async (
-  sequelizeClient: SequelizeClient,
+  dbClient: DbClient,
   pageNumber: number,
   pageSize: number
-): Promise<{ count: number; rows: Node[] }> => {
-  const nodeModel = sequelizeClient.getNodeModel();
+): Promise<{ count: number; rows: Node[] } | undefined> => {
+  const nodeModel = dbClient.sequelize?.models.Node;
+
+  if (nodeModel === undefined) {
+    return { count: 0, rows: [] };
+  }
 
   const { count, rows } = await nodeModel.findAndCountAll({
     offset: pageNumber * pageSize,
@@ -41,7 +51,7 @@ export const getNodes = async (
 
   return {
     count,
-    rows: rows.map((model) => {
+    rows: rows.map((model: Model<NodeInstance>) => {
       const dbNode = model.get();
 
       return map(dbNode);
@@ -50,10 +60,14 @@ export const getNodes = async (
 };
 
 export const createNode = async (
-  sequelizeClient: SequelizeClient,
+  dbClient: DbClient,
   newNode: Node
-): Promise<Node> => {
-  const nodeModel = sequelizeClient.getNodeModel();
+): Promise<Node | undefined> => {
+  const nodeModel = dbClient.sequelize?.models.Node;
+
+  if (nodeModel === undefined) {
+    return;
+  }
 
   const model = await nodeModel.create({
     id: newNode.id || v4(),
@@ -63,10 +77,4 @@ export const createNode = async (
   const dbNode = model.get();
 
   return map(dbNode);
-};
-
-export default {
-  getNodeById,
-  getNodes,
-  createNode,
 };
