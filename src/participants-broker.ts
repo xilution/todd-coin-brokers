@@ -56,7 +56,7 @@ export const getParticipantByPublicKey = async (
 
   if (models.length > 1) {
     throw new Error(
-      `unable to get a participant by public key b/c more than one participant was found for the public key ${publicKey}`
+      `unable to get a participant by public key because more than one participant was found for the public key ${publicKey}`
     );
   }
 
