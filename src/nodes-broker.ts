@@ -36,7 +36,7 @@ export const getNodes = async (
   dbClient: DbClient,
   pageNumber: number,
   pageSize: number
-): Promise<{ count: number; rows: Node[] } | undefined> => {
+): Promise<{ count: number; rows: Node[] }> => {
   const nodeModel = dbClient.sequelize?.models.Node;
 
   if (nodeModel === undefined) {
