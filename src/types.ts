@@ -40,3 +40,11 @@ export interface BlockInstance extends Model {
   previousHash: string;
   hash: string;
 }
+
+export interface DatabaseSettings {
+  database: string;
+  username: string;
+  password: string;
+  dbHost: string;
+  dbPort: number;
+}
