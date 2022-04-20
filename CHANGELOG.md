@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/xilution/todd-coin-brokers/compare/v1.0.4...v1.1.0) (2022-04-20)
+
+
+### Features
+
+* added environment utils for db settings ([163ebb9](https://github.com/xilution/todd-coin-brokers/commit/163ebb936bd470e7f9752f7cbae49d5a2727c3bc))
+
 ## [1.0.4](https://github.com/xilution/todd-coin-brokers/compare/v1.0.3...v1.0.4) (2022-04-15)
 
 
