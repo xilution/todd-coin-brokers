@@ -141,6 +141,7 @@ export const createBlock = async (
 
     const model = await blockModel.create({
       id: newBlock.id || v4(),
+      sequenceId: newBlock.sequenceId,
       nonce: newBlock.nonce,
       previousHash: newBlock.previousHash,
       hash: newBlock.hash,
