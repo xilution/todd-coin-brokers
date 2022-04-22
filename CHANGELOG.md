@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/xilution/todd-coin-brokers/compare/v1.1.0...v1.2.0) (2022-04-22)
+
+
+### Features
+
+* added getLatestBlock function ([d993b6a](https://github.com/xilution/todd-coin-brokers/commit/d993b6a6a9a113c3e33f8f834ce7de544eba3c7e))
+
 # [1.1.0](https://github.com/xilution/todd-coin-brokers/compare/v1.0.4...v1.1.0) (2022-04-20)
 
 
