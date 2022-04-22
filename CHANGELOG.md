@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/xilution/todd-coin-brokers/compare/v1.2.0...v1.2.1) (2022-04-22)
+
+
+### Bug Fixes
+
+* added transactions to latest block ([9baba13](https://github.com/xilution/todd-coin-brokers/commit/9baba13a56170e89b324f37289452e5b54594b26))
+
 # [1.2.0](https://github.com/xilution/todd-coin-brokers/compare/v1.1.0...v1.2.0) (2022-04-22)
 
 
