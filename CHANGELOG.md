@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/xilution/todd-coin-brokers/compare/v1.2.2...v1.3.0) (2022-04-22)
+
+
+### Features
+
+* order blocks by sequenceId ([be484d2](https://github.com/xilution/todd-coin-brokers/commit/be484d2974f90e2d82cc5c8b8858b1c84fbe6c9c))
+
 ## [1.2.2](https://github.com/xilution/todd-coin-brokers/compare/v1.2.1...v1.2.2) (2022-04-22)
 
 
