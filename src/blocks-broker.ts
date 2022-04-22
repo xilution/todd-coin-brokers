@@ -81,10 +81,10 @@ export const getLatestBlock = async (
   const dbBlock = model.get();
 
   const { rows } = await getBlockTransactions(
-      dbClient,
-      0,
-      MAX_TRANSACTIONS_PER_BLOCK,
-      dbBlock.id
+    dbClient,
+    0,
+    MAX_TRANSACTIONS_PER_BLOCK,
+    dbBlock.id
   );
 
   return { ...map(dbBlock), transactions: rows };
