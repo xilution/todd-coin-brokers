@@ -103,7 +103,7 @@ export const getBlocks = async (
 
   const { count, rows } = await blockModel.findAndCountAll({
     offset: pageNumber * pageSize,
-    order: [["createdAt", "ASC"]],
+    order: [["sequenceId", "DESC"]],
     limit: pageSize,
   });
 
