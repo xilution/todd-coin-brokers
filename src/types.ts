@@ -34,6 +34,7 @@ export interface TransactionInstance extends Model {
 
 export interface BlockInstance extends Model {
   id: string;
+  sequenceId: number;
   createdAt: string;
   updatedAt: string;
   nonce: number;

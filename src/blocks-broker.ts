@@ -7,9 +7,12 @@ import {
 } from "@xilution/todd-coin-constants";
 import { getBlockTransactions } from "./transactions-broker";
 import { BlockInstance } from "./types";
+import { Model } from "sequelize";
+import _ from "lodash";
 
 const map = (dbBlock: BlockInstance): Block => ({
   id: dbBlock.id,
+  sequenceId: dbBlock.sequenceId,
   createdAt: dbBlock.createdAt,
   updatedAt: dbBlock.updatedAt,
   transactions: [],
@@ -44,6 +47,40 @@ export const getBlockById = async (
   );
 
   return { ...map(dbBlock), transactions: rows };
+};
+
+export const getLatestBlock = async (
+  dbClient: DbClient
+): Promise<Block | undefined> => {
+  const blockModel = dbClient.sequelize?.models.Block;
+
+  if (blockModel === undefined) {
+    return;
+  }
+
+  const maxSequenceId: number = await blockModel.max("sequenceId");
+
+  const models: Model[] = await blockModel.findAll({
+    where: {
+      sequenceId: maxSequenceId,
+    },
+  });
+
+  if (models.length > 1) {
+    throw new Error(
+      `unable to get latest block because more than one block was found with the same sequenceId ${maxSequenceId}`
+    );
+  }
+
+  const model = _.first(models);
+
+  if (model === undefined) {
+    return;
+  }
+
+  const dbBlock = model.get();
+
+  return map(dbBlock);
 };
 
 export const getBlocks = async (

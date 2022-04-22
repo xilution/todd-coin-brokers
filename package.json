@@ -8,6 +8,10 @@
   },
   "scripts": {
     "build": "tsc",
+    "docker-start": "docker-compose -f docker-compose.yml up -d",
+    "docker-restart": "docker-compose -f docker-compose.yml restart",
+    "docker-stop": "docker-compose -f docker-compose.yml down",
+    "docker-logs": "docker-compose logs -f",
     "clean": "rm -rf ./coverage ./dist",
     "format": "prettier --write .",
     "watch": "nodemon --watch src -e ts --exec \"npm run build\"",
@@ -32,8 +36,8 @@
   "types": "dist/index.d.ts",
   "dependencies": {
     "@xilution/todd-coin-constants": "^1.1.0",
-    "@xilution/todd-coin-types": "^1.1.0",
-    "@xilution/todd-coin-utils": "^1.1.1",
+    "@xilution/todd-coin-types": "^1.3.0",
+    "@xilution/todd-coin-utils": "^2.1.0",
     "lodash": "^4.17.21",
     "pg": "^8.7.3",
     "pg-hstore": "^2.3.4",

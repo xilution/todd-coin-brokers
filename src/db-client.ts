@@ -148,6 +148,10 @@ export class DbClient {
           allowNull: false,
           primaryKey: true,
         },
+        sequenceId: {
+          type: DataTypes.INTEGER,
+          allowNull: false,
+        },
         nonce: {
           type: DataTypes.INTEGER,
           allowNull: false,
