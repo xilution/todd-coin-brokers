@@ -1,3 +1,15 @@
+# [2.0.0](https://github.com/xilution/todd-coin-brokers/compare/v1.3.0...v2.0.0) (2022-04-27)
+
+
+### Features
+
+* added organization participant reference ([ac0f2af](https://github.com/xilution/todd-coin-brokers/commit/ac0f2afe963d1fbc732aee413b106f220ea64aa7))
+
+
+### BREAKING CHANGES
+
+* change function signatures
+
 # [1.3.0](https://github.com/xilution/todd-coin-brokers/compare/v1.2.2...v1.3.0) (2022-04-22)
 
 
