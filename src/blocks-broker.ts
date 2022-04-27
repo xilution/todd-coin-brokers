@@ -1,4 +1,9 @@
-import { Block, Transaction } from "@xilution/todd-coin-types";
+import {
+  Block,
+  BlockTransaction,
+  TransactionDetails,
+  TransactionType,
+} from "@xilution/todd-coin-types";
 import { DbClient } from "./db-client";
 import { v4 } from "uuid";
 import {
@@ -9,6 +14,7 @@ import { getBlockTransactions } from "./transactions-broker";
 import { BlockInstance } from "./types";
 import { Model } from "sequelize";
 import _ from "lodash";
+import dayjs from "dayjs";
 
 const map = (dbBlock: BlockInstance): Block => ({
   id: dbBlock.id,
@@ -103,7 +109,7 @@ export const getBlocks = async (
 
   const { count, rows } = await blockModel.findAndCountAll({
     offset: pageNumber * pageSize,
-    order: [["sequenceId", "DESC"]],
+    order: [["sequenceId", "ASC"]],
     limit: pageSize,
   });
 
@@ -129,7 +135,7 @@ export const getBlocks = async (
 export const createBlock = async (
   dbClient: DbClient,
   newBlock: Block,
-  minerPublicKey: string
+  minerParticipantId: string
 ): Promise<Block | undefined> => {
   return await dbClient.transaction<Block | undefined>(async () => {
     const blockModel = dbClient.sequelize?.models.Block;
@@ -148,27 +154,40 @@ export const createBlock = async (
     });
 
     await Promise.all(
-      newBlock.transactions.map((transaction: Transaction) => {
-        return transactionModel.update(
-          {
-            type: "block",
-            blockId: newBlock.id,
-          },
-          {
-            where: {
-              id: transaction.id,
+      newBlock.transactions.map(
+        (transaction: BlockTransaction<TransactionDetails>) => {
+          return transactionModel.update(
+            {
+              state: "block",
+              blockId: newBlock.id,
             },
-          }
-        );
-      })
+            {
+              where: {
+                id: transaction.id,
+              },
+            }
+          );
+        }
+      )
     );
+
+    const now = dayjs();
 
     await transactionModel.create({
       id: v4(),
-      type: "signed",
-      to: minerPublicKey,
-      amount: MINING_REWARD,
-      description: "mining reward",
+      state: "signed",
+      type: _.toLower(TransactionType.TIME),
+      toParticipantId: minerParticipantId,
+      goodPoints: MINING_REWARD,
+      description: "Mining reward",
+      details: JSON.stringify({
+        dateRanges: [
+          {
+            from: now.toISOString(),
+            to: now.toISOString(),
+          },
+        ],
+      }),
     });
 
     const dbBlock = model.get();

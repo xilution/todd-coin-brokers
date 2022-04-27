@@ -13,7 +13,13 @@ export const getDatabaseSettings = (): DatabaseSettings => {
   const dbHost = process.env.DB_HOST || DEFAULT_DB_HOST;
   const dbPort = Number(process.env.DB_PORT) || DEFAULT_DB_PORT;
 
-  return { database, username, password, dbHost, dbPort };
+  return {
+    database,
+    username,
+    password,
+    dbHost,
+    dbPort,
+  };
 };
 
 export default {

@@ -1,11 +1,11 @@
 import sequelize, { DataTypes, Sequelize } from "sequelize";
-import { Block, Participant, Transaction } from "@xilution/todd-coin-types";
-import { blockUtils } from "@xilution/todd-coin-utils";
-import { Client } from "pg";
 import {
   BlockInstance,
   NodeInstance,
+  OrganizationInstance,
+  OrganizationParticipantRefInstance,
   ParticipantInstance,
+  ParticipantKeyInstance,
   TransactionInstance,
 } from "./types";
 
@@ -19,26 +19,11 @@ export class DbClient {
     host: string,
     port: number
   ) {
-    let client;
-    try {
-      client = new Client({
-        user: username,
-        password,
-        host,
-        port,
-      });
-      await client.connect();
-      await client.query(`CREATE DATABASE "${database}"`);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      await client?.end();
-    }
-
     this.sequelize = new Sequelize(database, username, password, {
       host,
       port,
       dialect: "postgres",
+      logging: false,
     });
 
     this.sequelize.define<NodeInstance>(
@@ -59,6 +44,62 @@ export class DbClient {
       }
     );
 
+    this.sequelize.define<OrganizationInstance>(
+      "Organization",
+      {
+        id: {
+          type: DataTypes.STRING,
+          allowNull: false,
+          primaryKey: true,
+        },
+        name: {
+          type: DataTypes.STRING,
+          allowNull: false,
+        },
+        email: {
+          type: DataTypes.STRING,
+          allowNull: false,
+        },
+        roles: {
+          type: DataTypes.ARRAY(DataTypes.STRING),
+          allowNull: false,
+        },
+      },
+      {
+        tableName: "organizations",
+      }
+    );
+
+    this.sequelize.define<ParticipantKeyInstance>(
+      "ParticipantKey",
+      {
+        id: {
+          type: DataTypes.STRING,
+          allowNull: false,
+          primaryKey: true,
+        },
+        participantId: {
+          type: DataTypes.STRING,
+          allowNull: false,
+        },
+        publicKey: {
+          type: DataTypes.STRING,
+          allowNull: false,
+        },
+        effectiveFrom: {
+          type: DataTypes.STRING,
+          allowNull: false,
+        },
+        effectiveTo: {
+          type: DataTypes.STRING,
+          allowNull: false,
+        },
+      },
+      {
+        tableName: "participant-keys",
+      }
+    );
+
     this.sequelize.define<ParticipantInstance>(
       "Participant",
       {
@@ -66,6 +107,14 @@ export class DbClient {
           type: DataTypes.STRING,
           allowNull: false,
           primaryKey: true,
+        },
+        email: {
+          type: DataTypes.STRING,
+          allowNull: false,
+        },
+        password: {
+          type: DataTypes.STRING,
+          allowNull: false,
         },
         firstName: {
           type: DataTypes.STRING,
@@ -75,17 +124,9 @@ export class DbClient {
           type: DataTypes.STRING,
           allowNull: true,
         },
-        email: {
-          type: DataTypes.STRING,
-          allowNull: true,
-        },
         phone: {
           type: DataTypes.STRING,
           allowNull: true,
-        },
-        publicKey: {
-          type: DataTypes.STRING,
-          allowNull: false,
         },
         roles: {
           type: DataTypes.ARRAY(DataTypes.STRING),
@@ -97,6 +138,30 @@ export class DbClient {
       }
     );
 
+    this.sequelize.define<OrganizationParticipantRefInstance>(
+      "OrganizationParticipantRef",
+      {
+        id: {
+          type: DataTypes.STRING,
+          allowNull: false,
+          primaryKey: true,
+        },
+        organizationId: {
+          type: DataTypes.STRING,
+          allowNull: false,
+          primaryKey: true,
+        },
+        participantId: {
+          type: DataTypes.STRING,
+          allowNull: false,
+          primaryKey: true,
+        },
+      },
+      {
+        tableName: "organization-participant-refs",
+      }
+    );
+
     this.sequelize.define<TransactionInstance>(
       "Transaction",
       {
@@ -105,28 +170,37 @@ export class DbClient {
           allowNull: false,
           primaryKey: true,
         },
-        type: {
+        state: {
           type: DataTypes.STRING,
           values: ["pending", "signed", "block"],
+          allowNull: false,
+        },
+        type: {
+          type: DataTypes.STRING,
+          values: ["time", "treasure"],
           allowNull: false,
         },
         blockId: {
           type: DataTypes.STRING,
           allowNull: true,
         },
-        from: {
+        fromParticipantId: {
           type: DataTypes.STRING,
           allowNull: true,
         },
-        to: {
+        toParticipantId: {
           type: DataTypes.STRING,
           allowNull: false,
         },
-        amount: {
+        goodPoints: {
           type: DataTypes.BIGINT,
-          allowNull: false,
+          allowNull: true,
         },
         description: {
+          type: DataTypes.STRING,
+          allowNull: false,
+        },
+        details: {
           type: DataTypes.STRING,
           allowNull: false,
         },
@@ -174,50 +248,23 @@ export class DbClient {
       foreignKey: "blockId",
     });
 
-    await this.sequelize.sync({ force: false, alter: true });
-
-    const genesisParticipant: Participant =
-      blockUtils.createGenesisParticipant();
-
-    await this.sequelize.models.Participant.findOrCreate({
-      where: {
-        id: genesisParticipant.id,
-      },
-      defaults: {
-        ...genesisParticipant,
-        publicKey: genesisParticipant.key.public,
-      },
-    });
-
-    const genesisBlock: Block = blockUtils.createGenesisBlock();
-
-    await this.sequelize.models.Block.findOrCreate({
-      where: {
-        id: genesisBlock.id,
-      },
-      defaults: {
-        ...genesisBlock,
-      },
-    });
-
-    const genesisBlockTransactions = genesisBlock.transactions;
-
-    await Promise.all(
-      genesisBlockTransactions.map(async (transaction: Transaction) => {
-        return this.sequelize?.models.Transaction?.findOrCreate({
-          where: {
-            id: transaction.id,
-          },
-          defaults: {
-            type: "block",
-            blockId: genesisBlock.id,
-            ...transaction,
-          },
-        });
-      })
+    this.sequelize.models.Organization.belongsToMany(
+      this.sequelize.models.Participant,
+      {
+        through: this.sequelize.models.OrganizationParticipantRef,
+        foreignKey: "organizationId",
+      }
     );
 
-    console.log("All models were synchronized successfully.");
+    this.sequelize.models.Participant.belongsToMany(
+      this.sequelize.models.Organization,
+      {
+        through: this.sequelize.models.OrganizationParticipantRef,
+        foreignKey: "participantId",
+      }
+    );
+
+    await this.sequelize.sync({ force: false, alter: true });
   }
 
   async transaction<T>(

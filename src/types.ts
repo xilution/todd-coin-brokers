@@ -1,5 +1,13 @@
 import { Model } from "sequelize";
 
+export interface OrganizationParticipantRef {
+  id?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  organizationId: string;
+  participantId: string;
+}
+
 export interface NodeInstance extends Model {
   id: string;
   createdAt: string;
@@ -7,36 +15,65 @@ export interface NodeInstance extends Model {
   baseUrl: string;
 }
 
+export interface OrganizationInstance extends Model {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  name: string;
+  email: string;
+  roles: string[];
+}
+
+export interface ParticipantKeyInstance extends Model {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  participantId: string;
+  publicKey: string;
+  effectiveFrom: string;
+  effectiveTo: string;
+}
+
 export interface ParticipantInstance extends Model {
   id: string;
   createdAt: string;
   updatedAt: string;
+  email: string;
+  password: string;
   firstName: string;
   lastName: string;
-  email: string;
   phone: string;
-  publicKey: string;
   roles: string[];
+}
+
+export interface OrganizationParticipantRefInstance extends Model {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  organizationId: string;
+  participantId: string;
 }
 
 export interface TransactionInstance extends Model {
   id: string;
   createdAt: string;
   updatedAt: string;
+  state: string;
   type: string;
   blockId: string;
-  from: string;
-  to: string;
-  amount: number;
+  fromParticipantId: string;
+  toParticipantId: string;
+  goodPoints: number;
   description: string;
+  details: string;
   signature: string;
 }
 
 export interface BlockInstance extends Model {
   id: string;
-  sequenceId: number;
   createdAt: string;
   updatedAt: string;
+  sequenceId: number;
   nonce: number;
   previousHash: string;
   hash: string;

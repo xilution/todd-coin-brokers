@@ -1,25 +1,76 @@
-import { Transaction } from "@xilution/todd-coin-types";
+import {
+  BlockTransaction,
+  Participant,
+  PendingTransaction,
+  SignedTransaction,
+  TransactionDetails,
+  TransactionType,
+} from "@xilution/todd-coin-types";
 import { DbClient } from "./db-client";
 import { v4 } from "uuid";
 import { TransactionInstance } from "./types";
 import _ from "lodash";
-import { WhereOptions } from "sequelize";
+import { getParticipantById } from "./participants-broker";
+import { buildWhere } from "./broker-utils";
 
-const map = (dbTransaction: TransactionInstance): Transaction => ({
+const transactionTypeMap: { [type: string]: TransactionType } = {
+  time: TransactionType.TIME,
+  treasure: TransactionType.TREASURE,
+};
+
+const mapPendingTransaction = (
+  dbTransaction: TransactionInstance,
+  from: Participant | undefined,
+  to: Participant
+): PendingTransaction<TransactionDetails> => ({
   id: dbTransaction.id,
   createdAt: dbTransaction.createdAt,
   updatedAt: dbTransaction.updatedAt,
-  to: dbTransaction.to,
-  from: dbTransaction.from,
-  amount: dbTransaction.amount,
+  from,
+  to,
+  description: dbTransaction.description,
+  type: transactionTypeMap[dbTransaction.type],
+  details: JSON.parse(dbTransaction.details),
+});
+
+const mapSignedTransaction = (
+  dbTransaction: TransactionInstance,
+  from: Participant | undefined,
+  to: Participant
+): SignedTransaction<TransactionDetails> => ({
+  id: dbTransaction.id,
+  createdAt: dbTransaction.createdAt,
+  updatedAt: dbTransaction.updatedAt,
+  from,
+  to,
+  description: dbTransaction.description,
+  goodPoints: dbTransaction.goodPoints,
+  signature: dbTransaction.signature,
+  type: transactionTypeMap[dbTransaction.type],
+  details: JSON.parse(dbTransaction.details),
+});
+
+const mapBlockTransaction = (
+  dbTransaction: TransactionInstance,
+  from: Participant | undefined,
+  to: Participant
+): BlockTransaction<TransactionDetails> => ({
+  id: dbTransaction.id,
+  createdAt: dbTransaction.createdAt,
+  updatedAt: dbTransaction.updatedAt,
+  from,
+  to,
+  goodPoints: dbTransaction.goodPoints,
   description: dbTransaction.description,
   signature: dbTransaction.signature,
+  type: transactionTypeMap[dbTransaction.type],
+  details: JSON.parse(dbTransaction.details),
 });
 
 export const getPendingTransactionById = async (
   dbClient: DbClient,
   pendingTransactionId: string
-): Promise<Transaction | undefined> => {
+): Promise<PendingTransaction<TransactionDetails> | undefined> => {
   const transactionModel = dbClient.sequelize?.models.Transaction;
 
   if (transactionModel === undefined) {
@@ -38,13 +89,22 @@ export const getPendingTransactionById = async (
     return;
   }
 
-  return map(dbTransaction);
+  const fromParticipant = (await getParticipantById(
+    dbClient,
+    dbTransaction.from
+  )) as Participant | undefined;
+  const toParticipant = (await getParticipantById(
+    dbClient,
+    dbTransaction.to
+  )) as Participant;
+
+  return mapPendingTransaction(dbTransaction, fromParticipant, toParticipant);
 };
 
 export const getSignedTransactionById = async (
   dbClient: DbClient,
   signedTransactionId: string
-): Promise<Transaction | undefined> => {
+): Promise<SignedTransaction<TransactionDetails> | undefined> => {
   const transactionModel = dbClient.sequelize?.models.Transaction;
 
   if (transactionModel === undefined) {
@@ -63,14 +123,23 @@ export const getSignedTransactionById = async (
     return;
   }
 
-  return map(dbTransaction);
+  const fromParticipant = (await getParticipantById(
+    dbClient,
+    dbTransaction.from
+  )) as Participant | undefined;
+  const toParticipant = (await getParticipantById(
+    dbClient,
+    dbTransaction.to
+  )) as Participant;
+
+  return mapSignedTransaction(dbTransaction, fromParticipant, toParticipant);
 };
 
 export const getBlockTransactionById = async (
   dbClient: DbClient,
   blockId: string,
   blockTransactionId: string
-): Promise<Transaction | undefined> => {
+): Promise<BlockTransaction<TransactionDetails> | undefined> => {
   const transactionModel = dbClient.sequelize?.models.Transaction;
 
   if (transactionModel === undefined) {
@@ -89,7 +158,16 @@ export const getBlockTransactionById = async (
     return;
   }
 
-  return map(dbTransaction);
+  const fromParticipant = (await getParticipantById(
+    dbClient,
+    dbTransaction.from
+  )) as Participant | undefined;
+  const toParticipant = (await getParticipantById(
+    dbClient,
+    dbTransaction.to
+  )) as Participant;
+
+  return mapBlockTransaction(dbTransaction, fromParticipant, toParticipant);
 };
 
 export const getPendingTransactions = async (
@@ -98,7 +176,10 @@ export const getPendingTransactions = async (
   pageSize: number,
   from?: string,
   to?: string
-): Promise<{ count: number; rows: Transaction[] }> => {
+): Promise<{
+  count: number;
+  rows: PendingTransaction<TransactionDetails>[];
+}> => {
   const transactionModel = dbClient.sequelize?.models.Transaction;
 
   if (transactionModel === undefined) {
@@ -106,21 +187,37 @@ export const getPendingTransactions = async (
   }
 
   const { count, rows } = await transactionModel.findAndCountAll({
-    where: _.pickBy({ from, to, type: "pending" }, _.identity) as WhereOptions<{
-      publicKey: string;
-    }>,
+    where: {
+      ...buildWhere({ from, to }),
+      state: "pending",
+    },
     offset: pageNumber * pageSize,
-    order: [["createdAt", "ASC"]],
+    order: [["createdAt", "DESC"]],
     limit: pageSize,
   });
 
   return {
     count,
-    rows: rows.map((model) => {
-      const dbTransaction = model.get();
+    rows: await Promise.all(
+      rows.map(async (model) => {
+        const dbTransaction = model.get();
 
-      return map(dbTransaction);
-    }),
+        const fromParticipant = (await getParticipantById(
+          dbClient,
+          dbTransaction.from
+        )) as Participant | undefined;
+        const toParticipant = (await getParticipantById(
+          dbClient,
+          dbTransaction.to
+        )) as Participant;
+
+        return mapPendingTransaction(
+          dbTransaction,
+          fromParticipant,
+          toParticipant
+        );
+      })
+    ),
   };
 };
 
@@ -130,38 +227,10 @@ export const getSignedTransactions = async (
   pageSize: number,
   from?: string,
   to?: string
-): Promise<{ count: number; rows: Transaction[] }> => {
-  const transactionModel = dbClient.sequelize?.models.Transaction;
-
-  if (transactionModel === undefined) {
-    return { count: 0, rows: [] };
-  }
-
-  const { count, rows } = await transactionModel.findAndCountAll({
-    where: _.pickBy({ from, to, type: "signed" }, _.identity) as WhereOptions<{
-      publicKey: string;
-    }>,
-    offset: pageNumber * pageSize,
-    order: [["createdAt", "ASC"]],
-    limit: pageSize,
-  });
-
-  return {
-    count,
-    rows: rows.map((model) => {
-      const dbTransaction = model.get();
-
-      return map(dbTransaction);
-    }),
-  };
-};
-
-export const getBlockTransactions = async (
-  dbClient: DbClient,
-  pageNumber: number,
-  pageSize: number,
-  blockId: string
-): Promise<{ count: number; rows: Transaction[] }> => {
+): Promise<{
+  count: number;
+  rows: SignedTransaction<TransactionDetails>[];
+}> => {
   const transactionModel = dbClient.sequelize?.models.Transaction;
 
   if (transactionModel === undefined) {
@@ -170,28 +239,90 @@ export const getBlockTransactions = async (
 
   const { count, rows } = await transactionModel.findAndCountAll({
     where: {
-      type: "block",
-      blockId,
+      ...buildWhere({ from, to }),
+      state: "signed",
     },
     offset: pageNumber * pageSize,
-    order: [["createdAt", "ASC"]],
+    order: [["createdAt", "DESC"]],
     limit: pageSize,
   });
 
   return {
     count,
-    rows: rows.map((model) => {
-      const dbTransaction = model.get();
+    rows: await Promise.all(
+      rows.map(async (model) => {
+        const dbTransaction = model.get();
 
-      return map(dbTransaction);
-    }),
+        const fromParticipant = (await getParticipantById(
+          dbClient,
+          dbTransaction.from
+        )) as Participant | undefined;
+        const toParticipant = (await getParticipantById(
+          dbClient,
+          dbTransaction.to
+        )) as Participant;
+
+        return mapSignedTransaction(
+          dbTransaction,
+          fromParticipant,
+          toParticipant
+        );
+      })
+    ),
+  };
+};
+
+export const getBlockTransactions = async (
+  dbClient: DbClient,
+  pageNumber: number,
+  pageSize: number,
+  blockId: string
+): Promise<{ count: number; rows: BlockTransaction<TransactionDetails>[] }> => {
+  const transactionModel = dbClient.sequelize?.models.Transaction;
+
+  if (transactionModel === undefined) {
+    return { count: 0, rows: [] };
+  }
+
+  const { count, rows } = await transactionModel.findAndCountAll({
+    where: {
+      state: "block",
+      blockId,
+    },
+    offset: pageNumber * pageSize,
+    order: [["createdAt", "DESC"]],
+    limit: pageSize,
+  });
+
+  return {
+    count,
+    rows: await Promise.all(
+      rows.map(async (model) => {
+        const dbTransaction = model.get();
+
+        const fromParticipant = (await getParticipantById(
+          dbClient,
+          dbTransaction.from
+        )) as Participant | undefined;
+        const toParticipant = (await getParticipantById(
+          dbClient,
+          dbTransaction.to
+        )) as Participant;
+
+        return mapBlockTransaction(
+          dbTransaction,
+          fromParticipant,
+          toParticipant
+        );
+      })
+    ),
   };
 };
 
 export const createPendingTransaction = async (
   dbClient: DbClient,
-  newPendingTransaction: Transaction
-): Promise<Transaction | undefined> => {
+  newPendingTransaction: PendingTransaction<TransactionDetails>
+): Promise<PendingTransaction<TransactionDetails> | undefined> => {
   const transactionModel = dbClient.sequelize?.models.Transaction;
 
   if (transactionModel === undefined) {
@@ -200,35 +331,45 @@ export const createPendingTransaction = async (
 
   const model = await transactionModel.create({
     id: newPendingTransaction.id || v4(),
-    type: "pending",
-    to: newPendingTransaction.to,
-    from: newPendingTransaction.from,
-    amount: newPendingTransaction.amount,
+    state: "pending",
+    type: _.toLower(newPendingTransaction.type),
+    toParticipantId: newPendingTransaction.to.id,
+    fromParticipantId: newPendingTransaction.from?.id,
+    details: JSON.stringify(newPendingTransaction.details),
     description: newPendingTransaction.description,
-    signature: undefined,
   });
 
   const dbTransaction = model.get();
 
-  return map(dbTransaction);
+  const fromParticipant = (await getParticipantById(
+    dbClient,
+    dbTransaction.from
+  )) as Participant | undefined;
+  const toParticipant = (await getParticipantById(
+    dbClient,
+    dbTransaction.to
+  )) as Participant;
+
+  return mapPendingTransaction(dbTransaction, fromParticipant, toParticipant);
 };
 
 export const createSignedTransaction = async (
   dbClient: DbClient,
-  newSignedTransaction: Transaction
-): Promise<Transaction | undefined> => {
+  newSignedTransaction: SignedTransaction<TransactionDetails>
+): Promise<SignedTransaction<TransactionDetails> | undefined> => {
   const transactionModel = dbClient.sequelize?.models.Transaction;
 
   if (transactionModel === undefined) {
     return;
   }
 
-  const { id, signature } = newSignedTransaction;
+  const { id, signature, goodPoints } = newSignedTransaction;
 
   await transactionModel.update(
     {
-      type: "signed",
-      signature: signature,
+      state: "signed",
+      signature,
+      goodPoints,
     },
     {
       where: {
@@ -245,5 +386,14 @@ export const createSignedTransaction = async (
 
   const dbTransaction = model.get();
 
-  return map(dbTransaction);
+  const fromParticipant = (await getParticipantById(
+    dbClient,
+    dbTransaction.from
+  )) as Participant | undefined;
+  const toParticipant = (await getParticipantById(
+    dbClient,
+    dbTransaction.to
+  )) as Participant;
+
+  return mapSignedTransaction(dbTransaction, fromParticipant, toParticipant);
 };

@@ -45,7 +45,7 @@ export const getNodes = async (
 
   const { count, rows } = await nodeModel.findAndCountAll({
     offset: pageNumber * pageSize,
-    order: [["createdAt", "ASC"]],
+    order: [["createdAt", "DESC"]],
     limit: pageSize,
   });
 

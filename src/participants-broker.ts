@@ -1,20 +1,28 @@
-import { Participant, Roles } from "@xilution/todd-coin-types";
+import {
+  Participant,
+  ParticipantKey,
+  ParticipantRole,
+} from "@xilution/todd-coin-types";
 import { DbClient } from "./db-client";
-import { Model, WhereOptions } from "sequelize";
+import { Model } from "sequelize";
 import { v4 } from "uuid";
-import _ from "lodash";
 import { ParticipantInstance } from "./types";
+import { createParticipantKey } from "./participant-keys-broker";
+import { keyUtils } from "@xilution/todd-coin-utils";
+import { buildWhere } from "./broker-utils";
 
-const map = (dbParticipant: ParticipantInstance): Participant => ({
+const map = (
+  dbParticipant: ParticipantInstance
+): Omit<Participant, "keys"> => ({
   id: dbParticipant.id,
   createdAt: dbParticipant.createdAt,
   updatedAt: dbParticipant.createdAt,
+  email: dbParticipant.email,
+  password: dbParticipant.password,
   firstName: dbParticipant.firstName,
   lastName: dbParticipant.lastName,
-  email: dbParticipant.email,
   phone: dbParticipant.phone,
-  key: { public: dbParticipant.publicKey },
-  roles: dbParticipant.roles as Roles[],
+  roles: dbParticipant.roles as ParticipantRole[],
 });
 
 export const getParticipantById = async (
@@ -38,9 +46,9 @@ export const getParticipantById = async (
   return map(dbParticipant);
 };
 
-export const getParticipantByPublicKey = async (
+export const getParticipantByEmail = async (
   dbClient: DbClient,
-  publicKey: string
+  email: string
 ): Promise<Participant | undefined> => {
   const participantModel = dbClient.sequelize?.models.Participant;
 
@@ -48,25 +56,23 @@ export const getParticipantByPublicKey = async (
     return;
   }
 
-  const models: Model[] = await participantModel.findAll({
+  const { count, rows } = await participantModel.findAndCountAll({
     where: {
-      publicKey,
+      email,
     },
   });
 
-  if (models.length > 1) {
-    throw new Error(
-      `unable to get a participant by public key because more than one participant was found for the public key ${publicKey}`
+  if (count > 1) {
+    throw Error(
+      `unable to get participant by email because more then one participant is associated with the email: ${email}`
     );
   }
 
-  const model = _.first(models);
-
-  if (model === undefined) {
+  if (count === 0) {
     return;
   }
 
-  const dbParticipant = model.get();
+  const dbParticipant = rows[0].get();
 
   return map(dbParticipant);
 };
@@ -75,7 +81,7 @@ export const getParticipants = async (
   dbClient: DbClient,
   pageNumber: number,
   pageSize: number,
-  publicKey?: string
+  ids?: string[]
 ): Promise<{ count: number; rows: Participant[] }> => {
   const participantModel = dbClient.sequelize?.models.Participant;
 
@@ -84,11 +90,9 @@ export const getParticipants = async (
   }
 
   const { count, rows } = await participantModel.findAndCountAll({
-    where: _.pickBy({ publicKey }, _.identity) as WhereOptions<{
-      publicKey: string;
-    }>,
+    where: buildWhere({ ids }),
     offset: pageNumber * pageSize,
-    order: [["createdAt", "ASC"]],
+    order: [["createdAt", "DESC"]],
     limit: pageSize,
   });
 
@@ -107,22 +111,33 @@ export const createParticipant = async (
   newParticipant: Participant
 ): Promise<Participant | undefined> => {
   const participantModel = dbClient.sequelize?.models.Participant;
+  const participantKeyModel = dbClient.sequelize?.models.ParticipantKey;
 
-  if (participantModel === undefined) {
+  if (participantModel === undefined || participantKeyModel === undefined) {
     return;
   }
 
   const model = await participantModel.create({
     id: newParticipant.id || v4(),
+    email: newParticipant.email,
+    password: newParticipant.password,
     firstName: newParticipant.firstName,
     lastName: newParticipant.lastName,
-    email: newParticipant.email,
     phone: newParticipant.phone,
-    publicKey: newParticipant.key.public,
     roles: newParticipant.roles,
   });
 
   const dbParticipant = model.get();
 
-  return map(dbParticipant);
+  const createdParticipant: Participant = map(dbParticipant);
+  const newParticipantKey: ParticipantKey = keyUtils.generateParticipantKey();
+
+  const createdParticipantKey: ParticipantKey | undefined =
+    await createParticipantKey(dbClient, createdParticipant, newParticipantKey);
+
+  if (createdParticipantKey === undefined) {
+    return;
+  }
+
+  return { ...newParticipant, keys: [createdParticipantKey] };
 };
