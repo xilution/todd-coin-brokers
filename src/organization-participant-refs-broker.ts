@@ -149,3 +149,23 @@ export const createOrganizationParticipantRef = async (
 
   return map(dbOrganizationParticipantRef);
 };
+
+export const deleteOrganizationParticipantRef = async (
+  dbClient: DbClient,
+  organizationParticipantRef: OrganizationParticipantRef
+): Promise<void> => {
+  const organizationParticipantRefModel =
+    dbClient.sequelize?.models.OrganizationParticipantRef;
+
+  if (organizationParticipantRefModel === undefined) {
+    return;
+  }
+
+  const { id } = organizationParticipantRef;
+
+  await organizationParticipantRefModel.destroy({
+    where: {
+      id,
+    },
+  });
+};
