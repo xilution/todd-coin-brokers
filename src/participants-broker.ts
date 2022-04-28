@@ -141,3 +141,34 @@ export const createParticipant = async (
 
   return { ...newParticipant, keys: [createdParticipantKey] };
 };
+
+export const updateParticipant = async (
+  dbClient: DbClient,
+  updatedParticipant: Participant
+): Promise<void> => {
+  const participantModel = dbClient.sequelize?.models.Participant;
+
+  if (participantModel === undefined) {
+    return;
+  }
+
+  const { id, email, password, firstName, lastName, phone } =
+    updatedParticipant;
+
+  await participantModel.update(
+    {
+      email,
+      password,
+      firstName,
+      lastName,
+      phone,
+    },
+    {
+      where: {
+        id,
+      },
+    }
+  );
+
+  return;
+};
