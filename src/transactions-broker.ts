@@ -353,6 +353,30 @@ export const createPendingTransaction = async (
   return mapPendingTransaction(dbTransaction, fromParticipant, toParticipant);
 };
 
+export const updatePendingTransaction = async (
+  dbClient: DbClient,
+  updatedPendingTransaction: PendingTransaction<TransactionDetails>
+): Promise<void> => {
+  const transactionModel = dbClient.sequelize?.models.Transaction;
+
+  if (transactionModel === undefined) {
+    return;
+  }
+
+  const { id, details } = updatedPendingTransaction;
+
+  await transactionModel.update(
+    {
+      details: JSON.stringify(details),
+    },
+    {
+      where: {
+        id,
+      },
+    }
+  );
+};
+
 export const createSignedTransaction = async (
   dbClient: DbClient,
   newSignedTransaction: SignedTransaction<TransactionDetails>
@@ -396,4 +420,29 @@ export const createSignedTransaction = async (
   )) as Participant;
 
   return mapSignedTransaction(dbTransaction, fromParticipant, toParticipant);
+};
+
+export const updateSignedTransaction = async (
+  dbClient: DbClient,
+  updatedSignedTransaction: SignedTransaction<TransactionDetails>
+): Promise<void> => {
+  const transactionModel = dbClient.sequelize?.models.Transaction;
+
+  if (transactionModel === undefined) {
+    return;
+  }
+
+  const { id, signature, goodPoints } = updatedSignedTransaction;
+
+  await transactionModel.update(
+    {
+      signature,
+      goodPoints,
+    },
+    {
+      where: {
+        id,
+      },
+    }
+  );
 };
