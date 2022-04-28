@@ -1,3 +1,15 @@
+# [2.1.0](https://github.com/xilution/todd-coin-brokers/compare/v2.0.0...v2.1.0) (2022-04-28)
+
+
+### Features
+
+* added deactivateParticipantKey function ([861955f](https://github.com/xilution/todd-coin-brokers/commit/861955f3ba6f7a5f99b8f90b3d7f87dc1c36072c))
+* added deleteOrganizationParticipantRef function ([0521802](https://github.com/xilution/todd-coin-brokers/commit/052180200944632dcf4271c90b7939f3ee4a59f2))
+* added updateNode function ([2c50794](https://github.com/xilution/todd-coin-brokers/commit/2c50794a6f28954c52cb60df13d677e59089a87a))
+* added updateOrganization function ([6e13f19](https://github.com/xilution/todd-coin-brokers/commit/6e13f1998fa6eba60727db047b86baf73bce8b71))
+* added updateParticipant function ([41ab2b0](https://github.com/xilution/todd-coin-brokers/commit/41ab2b0f6b69424c32512f59eb602278f03b3b3e))
+* added updatePendingTransaction and updateSignedTransaction functions ([069e837](https://github.com/xilution/todd-coin-brokers/commit/069e8378896ffb0542f2eb1d64c4f2a34243ea8c))
+
 # [2.0.0](https://github.com/xilution/todd-coin-brokers/compare/v1.3.0...v2.0.0) (2022-04-27)
 
 
