@@ -96,7 +96,7 @@ export const updateOrganization = async (
     return;
   }
 
-  const { id, email, name, phone, url } = updatedOrganization;
+  const { id, email, name, phone, url, roles } = updatedOrganization;
 
   await organizationModel.update(
     {
@@ -104,6 +104,7 @@ export const updateOrganization = async (
       name,
       phone,
       url,
+      roles,
     },
     {
       where: {
