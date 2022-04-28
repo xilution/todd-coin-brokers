@@ -1,3 +1,11 @@
+# [2.2.0](https://github.com/xilution/todd-coin-brokers/compare/v2.1.0...v2.2.0) (2022-04-28)
+
+
+### Features
+
+* added roles to update organizations ([2a2cc75](https://github.com/xilution/todd-coin-brokers/commit/2a2cc758c7c2662731578598bf9aea365219d61c))
+* added roles to update participants ([16860d5](https://github.com/xilution/todd-coin-brokers/commit/16860d5ea5760dd3f36beac328669b972019b99f))
+
 # [2.1.0](https://github.com/xilution/todd-coin-brokers/compare/v2.0.0...v2.1.0) (2022-04-28)
 
 
