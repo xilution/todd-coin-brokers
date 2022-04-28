@@ -78,3 +78,29 @@ export const createNode = async (
 
   return map(dbNode);
 };
+
+export const updateNode = async (
+  dbClient: DbClient,
+  updatedNode: Node
+): Promise<void> => {
+  const nodeModel = dbClient.sequelize?.models.Node;
+
+  if (nodeModel === undefined) {
+    return;
+  }
+
+  const { id, baseUrl } = updatedNode;
+
+  await nodeModel.update(
+    {
+      baseUrl,
+    },
+    {
+      where: {
+        id,
+      },
+    }
+  );
+
+  return;
+};
