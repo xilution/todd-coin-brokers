@@ -85,3 +85,32 @@ export const createOrganization = async (
 
   return map(dbOrganization);
 };
+
+export const updateOrganization = async (
+  dbClient: DbClient,
+  updatedOrganization: Organization
+): Promise<void> => {
+  const organizationModel = dbClient.sequelize?.models.Organization;
+
+  if (organizationModel === undefined) {
+    return;
+  }
+
+  const { id, email, name, phone, url } = updatedOrganization;
+
+  await organizationModel.update(
+    {
+      email,
+      name,
+      phone,
+      url,
+    },
+    {
+      where: {
+        id,
+      },
+    }
+  );
+
+  return;
+};
