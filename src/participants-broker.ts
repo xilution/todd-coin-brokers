@@ -152,7 +152,7 @@ export const updateParticipant = async (
     return;
   }
 
-  const { id, email, password, firstName, lastName, phone } =
+  const { id, email, password, firstName, lastName, phone, roles } =
     updatedParticipant;
 
   await participantModel.update(
@@ -162,6 +162,7 @@ export const updateParticipant = async (
       firstName,
       lastName,
       phone,
+      roles,
     },
     {
       where: {
