@@ -118,3 +118,29 @@ export const createParticipantKey = async (
     participant,
   };
 };
+
+export const deactivateParticipantKey = async (
+  dbClient: DbClient,
+  updatedParticipantKey: ParticipantKey
+): Promise<void> => {
+  const participantKeyModel = dbClient.sequelize?.models.ParticipantKey;
+
+  if (participantKeyModel === undefined) {
+    return;
+  }
+
+  // todo - check to see if the effective to is greater than today and that the effective from is in the past
+
+  await participantKeyModel.update(
+    {
+      effectiveTo: dayjs().toISOString(),
+    },
+    {
+      where: {
+        id: updatedParticipantKey.id,
+      },
+    }
+  );
+
+  return;
+};
