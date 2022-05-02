@@ -139,7 +139,7 @@ export const createParticipant = async (
     return;
   }
 
-  return { ...newParticipant, keys: [createdParticipantKey] };
+  return { ...createdParticipant, keys: [createdParticipantKey] };
 };
 
 export const updateParticipant = async (
