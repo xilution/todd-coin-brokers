@@ -1,3 +1,10 @@
+## [2.2.1](https://github.com/xilution/todd-coin-brokers/compare/v2.2.0...v2.2.1) (2022-05-02)
+
+
+### Bug Fixes
+
+* fixed create participant function ([c034053](https://github.com/xilution/todd-coin-brokers/commit/c0340539cb4f767dbf479f4cb2367c52c5505cb2))
+
 # [2.2.0](https://github.com/xilution/todd-coin-brokers/compare/v2.1.0...v2.2.0) (2022-04-28)
 
 
