@@ -1,3 +1,10 @@
+# [2.3.0](https://github.com/xilution/todd-coin-brokers/compare/v2.2.1...v2.3.0) (2022-05-03)
+
+
+### Features
+
+* added entity relations ([5c24cb6](https://github.com/xilution/todd-coin-brokers/commit/5c24cb6ea8f0b86320e6d87fe47e94e29e8e8793))
+
 ## [2.2.1](https://github.com/xilution/todd-coin-brokers/compare/v2.2.0...v2.2.1) (2022-05-02)
 
 
