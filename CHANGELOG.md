@@ -1,3 +1,10 @@
+## [2.3.1](https://github.com/xilution/todd-coin-brokers/compare/v2.3.0...v2.3.1) (2022-05-03)
+
+
+### Bug Fixes
+
+* fixed transaction state reference ([e940b53](https://github.com/xilution/todd-coin-brokers/commit/e940b53ec954ee86db796907963f4e4210b7cf09))
+
 # [2.3.0](https://github.com/xilution/todd-coin-brokers/compare/v2.2.1...v2.3.0) (2022-05-03)
 
 
