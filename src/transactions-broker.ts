@@ -89,7 +89,7 @@ export const getPendingTransactionById = async (
 
   const dbTransaction = model.get();
 
-  if (dbTransaction.type !== "pending") {
+  if (dbTransaction.state !== "pending") {
     return;
   }
 
@@ -123,7 +123,7 @@ export const getSignedTransactionById = async (
 
   const dbTransaction = model.get();
 
-  if (dbTransaction.type !== "signed") {
+  if (dbTransaction.state !== "signed") {
     return;
   }
 
@@ -158,7 +158,7 @@ export const getBlockTransactionById = async (
 
   const dbTransaction = model.get();
 
-  if (dbTransaction.type !== "block" || dbTransaction.blockId !== blockId) {
+  if (dbTransaction.state !== "block" || dbTransaction.blockId !== blockId) {
     return;
   }
 
