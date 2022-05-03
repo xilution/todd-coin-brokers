@@ -1,3 +1,10 @@
+# [2.4.0](https://github.com/xilution/todd-coin-brokers/compare/v2.3.1...v2.4.0) (2022-05-03)
+
+
+### Features
+
+* added deletePendingTransactionById function ([57a32f8](https://github.com/xilution/todd-coin-brokers/commit/57a32f8648e8b0fd87a065050da8761b8be6b3a3))
+
 ## [2.3.1](https://github.com/xilution/todd-coin-brokers/compare/v2.3.0...v2.3.1) (2022-05-03)
 
 
