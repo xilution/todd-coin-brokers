@@ -302,8 +302,8 @@ export const getBlockTransactions = async (
 
   const { count, rows } = await transactionModel.findAndCountAll({
     where: {
-      state: "block",
       blockId,
+      state: "block",
     },
     offset: pageNumber * pageSize,
     order: [["createdAt", "DESC"]],
@@ -396,6 +396,7 @@ export const updatePendingTransaction = async (
     {
       where: {
         id,
+        state: "pending",
       },
     }
   );
@@ -422,6 +423,7 @@ export const createSignedTransaction = async (
     {
       where: {
         id,
+        state: "pending",
       },
     }
   );
@@ -466,7 +468,26 @@ export const updateSignedTransaction = async (
     {
       where: {
         id,
+        state: "signed",
       },
     }
   );
+};
+
+export const deletePendingTransactionById = async (
+  dbClient: DbClient,
+  pendingTransactionId: string
+): Promise<void> => {
+  const transactionModel = dbClient.sequelize?.models.Transaction;
+
+  if (transactionModel === undefined) {
+    return;
+  }
+
+  await transactionModel.destroy({
+    where: {
+      id: pendingTransactionId,
+      state: "pending",
+    },
+  });
 };
