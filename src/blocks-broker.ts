@@ -27,9 +27,24 @@ const map = (dbBlock: BlockInstance): Block => ({
   hash: dbBlock.hash,
 });
 
+const appendRelations = async (
+  dbClient: DbClient,
+  dbBlock: BlockInstance
+): Promise<Block> => {
+  const blockTransactionsResponse = await getBlockTransactions(
+    dbClient,
+    0,
+    MAX_TRANSACTIONS_PER_BLOCK,
+    dbBlock.id
+  );
+
+  return { ...map(dbBlock), transactions: blockTransactionsResponse.rows };
+};
+
 export const getBlockById = async (
   dbClient: DbClient,
-  id: string
+  id: string,
+  skipRelations?: boolean
 ): Promise<Block | undefined> => {
   const blockModel = dbClient.sequelize?.models.Block;
 
@@ -45,14 +60,11 @@ export const getBlockById = async (
 
   const dbBlock = model.get();
 
-  const { rows } = await getBlockTransactions(
-    dbClient,
-    0,
-    MAX_TRANSACTIONS_PER_BLOCK,
-    dbBlock.id
-  );
+  if (skipRelations) {
+    return map(dbBlock);
+  }
 
-  return { ...map(dbBlock), transactions: rows };
+  return await appendRelations(dbClient, dbBlock);
 };
 
 export const getLatestBlock = async (
@@ -86,14 +98,7 @@ export const getLatestBlock = async (
 
   const dbBlock = model.get();
 
-  const { rows } = await getBlockTransactions(
-    dbClient,
-    0,
-    MAX_TRANSACTIONS_PER_BLOCK,
-    dbBlock.id
-  );
-
-  return { ...map(dbBlock), transactions: rows };
+  return await appendRelations(dbClient, dbBlock);
 };
 
 export const getBlocks = async (
@@ -119,14 +124,7 @@ export const getBlocks = async (
       rows.map(async (model) => {
         const dbBlock = model.get();
 
-        const { rows } = await getBlockTransactions(
-          dbClient,
-          0,
-          MAX_TRANSACTIONS_PER_BLOCK,
-          dbBlock.id
-        );
-
-        return { ...map(dbBlock), transactions: rows };
+        return await appendRelations(dbClient, dbBlock);
       })
     ),
   };
@@ -192,13 +190,6 @@ export const createBlock = async (
 
     const dbBlock = model.get();
 
-    const { rows } = await getBlockTransactions(
-      dbClient,
-      0,
-      MAX_TRANSACTIONS_PER_BLOCK,
-      dbBlock.id
-    );
-
-    return { ...map(dbBlock), transactions: rows };
+    return await appendRelations(dbClient, dbBlock);
   });
 };

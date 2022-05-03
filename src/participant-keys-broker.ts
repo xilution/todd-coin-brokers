@@ -68,7 +68,8 @@ export const getEffectiveParticipantKeyByParticipant = async (
 export const getParticipantKeys = async (
   dbClient: DbClient,
   pageNumber: number,
-  pageSize: number
+  pageSize: number,
+  participantId: string
 ): Promise<{ count: number; rows: ParticipantKey[] }> => {
   const nodeModel = dbClient.sequelize?.models.ParticipantKey;
 
@@ -77,6 +78,9 @@ export const getParticipantKeys = async (
   }
 
   const { count, rows } = await nodeModel.findAndCountAll({
+    where: {
+      participantId,
+    },
     offset: pageNumber * pageSize,
     order: [["createdAt", "DESC"]],
     limit: pageSize,

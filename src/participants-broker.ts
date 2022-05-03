@@ -6,10 +6,16 @@ import {
 import { DbClient } from "./db-client";
 import { Model } from "sequelize";
 import { v4 } from "uuid";
-import { ParticipantInstance } from "./types";
-import { createParticipantKey } from "./participant-keys-broker";
+import { OrganizationParticipantRef, ParticipantInstance } from "./types";
+import {
+  createParticipantKey,
+  getParticipantKeys,
+} from "./participant-keys-broker";
 import { keyUtils } from "@xilution/todd-coin-utils";
 import { buildWhere } from "./broker-utils";
+import { DEFAULT_PAGE_SIZE } from "@xilution/todd-coin-constants";
+import { getOrganizations } from "./organizations-broker";
+import { getOrganizationParticipantRefByParticipantId } from "./organization-participant-refs-broker";
 
 const map = (
   dbParticipant: ParticipantInstance
@@ -24,6 +30,41 @@ const map = (
   phone: dbParticipant.phone,
   roles: dbParticipant.roles as ParticipantRole[],
 });
+
+const appendRelations = async (
+  dbClient: DbClient,
+  dbParticipant: ParticipantInstance
+): Promise<Participant> => {
+  const getParticipantKeysResponse = await getParticipantKeys(
+    dbClient,
+    0,
+    DEFAULT_PAGE_SIZE,
+    dbParticipant.id
+  );
+
+  const getOrganizationParticipantRefResponse =
+    await getOrganizationParticipantRefByParticipantId(
+      dbClient,
+      dbParticipant.id
+    );
+
+  const organizationsResponse = await getOrganizations(
+    dbClient,
+    0,
+    DEFAULT_PAGE_SIZE,
+    getOrganizationParticipantRefResponse.rows.reduce(
+      (ids: string[], row: OrganizationParticipantRef) =>
+        row.id ? ids.concat(row.id) : ids,
+      []
+    )
+  );
+
+  return {
+    ...map(dbParticipant),
+    keys: getParticipantKeysResponse.rows,
+    organizations: organizationsResponse.rows,
+  };
+};
 
 export const getParticipantById = async (
   dbClient: DbClient,
@@ -43,7 +84,7 @@ export const getParticipantById = async (
 
   const dbParticipant = model.get();
 
-  return map(dbParticipant);
+  return await appendRelations(dbClient, dbParticipant);
 };
 
 export const getParticipantByEmail = async (
@@ -74,7 +115,7 @@ export const getParticipantByEmail = async (
 
   const dbParticipant = rows[0].get();
 
-  return map(dbParticipant);
+  return await appendRelations(dbClient, dbParticipant);
 };
 
 export const getParticipants = async (
@@ -98,11 +139,13 @@ export const getParticipants = async (
 
   return {
     count,
-    rows: rows.map((model: Model) => {
-      const dbParticipant = model.get();
+    rows: await Promise.all(
+      rows.map(async (model: Model) => {
+        const dbParticipant = model.get();
 
-      return map(dbParticipant);
-    }),
+        return await appendRelations(dbClient, dbParticipant);
+      })
+    ),
   };
 };
 
@@ -130,16 +173,12 @@ export const createParticipant = async (
   const dbParticipant = model.get();
 
   const createdParticipant: Participant = map(dbParticipant);
+
   const newParticipantKey: ParticipantKey = keyUtils.generateParticipantKey();
 
-  const createdParticipantKey: ParticipantKey | undefined =
-    await createParticipantKey(dbClient, createdParticipant, newParticipantKey);
+  await createParticipantKey(dbClient, createdParticipant, newParticipantKey);
 
-  if (createdParticipantKey === undefined) {
-    return;
-  }
-
-  return { ...createdParticipant, keys: [createdParticipantKey] };
+  return await appendRelations(dbClient, dbParticipant);
 };
 
 export const updateParticipant = async (

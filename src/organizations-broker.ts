@@ -1,9 +1,12 @@
 import { Organization, OrganizationRole } from "@xilution/todd-coin-types";
 import { DbClient } from "./db-client";
 import { v4 } from "uuid";
-import { OrganizationInstance } from "./types";
+import { OrganizationInstance, OrganizationParticipantRef } from "./types";
 import { Model } from "sequelize";
 import { buildWhere } from "./broker-utils";
+import { getOrganizationParticipantRefByOrganizationId } from "./organization-participant-refs-broker";
+import { DEFAULT_PAGE_SIZE } from "@xilution/todd-coin-constants";
+import { getParticipants } from "./participants-broker";
 
 const map = (dbOrganization: OrganizationInstance): Organization => ({
   id: dbOrganization.id,
@@ -13,6 +16,30 @@ const map = (dbOrganization: OrganizationInstance): Organization => ({
   email: dbOrganization.email,
   roles: dbOrganization.roles as OrganizationRole[],
 });
+
+const appendRelations = async (
+  dbClient: DbClient,
+  dbOrganization: OrganizationInstance
+) => {
+  const getOrganizationParticipantRefResponse =
+    await getOrganizationParticipantRefByOrganizationId(
+      dbClient,
+      dbOrganization.id
+    );
+
+  const participantsResponse = await getParticipants(
+    dbClient,
+    0,
+    DEFAULT_PAGE_SIZE,
+    getOrganizationParticipantRefResponse.rows.reduce(
+      (ids: string[], row: OrganizationParticipantRef) =>
+        row.id ? ids.concat(row.id) : ids,
+      []
+    )
+  );
+
+  return { ...map(dbOrganization), participants: participantsResponse.rows };
+};
 
 export const getOrganizationById = async (
   dbClient: DbClient,
@@ -32,7 +59,7 @@ export const getOrganizationById = async (
 
   const dbOrganization = model.get();
 
-  return map(dbOrganization);
+  return appendRelations(dbClient, dbOrganization);
 };
 
 export const getOrganizations = async (
@@ -56,11 +83,13 @@ export const getOrganizations = async (
 
   return {
     count,
-    rows: rows.map((model: Model<OrganizationInstance>) => {
-      const dbOrganization = model.get();
+    rows: await Promise.all(
+      rows.map(async (model: Model<OrganizationInstance>) => {
+        const dbOrganization = model.get();
 
-      return map(dbOrganization);
-    }),
+        return appendRelations(dbClient, dbOrganization);
+      })
+    ),
   };
 };
 
@@ -83,7 +112,7 @@ export const createOrganization = async (
 
   const dbOrganization = model.get();
 
-  return map(dbOrganization);
+  return appendRelations(dbClient, dbOrganization);
 };
 
 export const updateOrganization = async (

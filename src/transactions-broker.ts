@@ -1,4 +1,5 @@
 import {
+  Block,
   BlockTransaction,
   Participant,
   PendingTransaction,
@@ -12,6 +13,7 @@ import { TransactionInstance } from "./types";
 import _ from "lodash";
 import { getParticipantById } from "./participants-broker";
 import { buildWhere } from "./broker-utils";
+import { getBlockById } from "./blocks-broker";
 
 const transactionTypeMap: { [type: string]: TransactionType } = {
   time: TransactionType.TIME,
@@ -53,7 +55,8 @@ const mapSignedTransaction = (
 const mapBlockTransaction = (
   dbTransaction: TransactionInstance,
   from: Participant | undefined,
-  to: Participant
+  to: Participant,
+  block: Block
 ): BlockTransaction<TransactionDetails> => ({
   id: dbTransaction.id,
   createdAt: dbTransaction.createdAt,
@@ -65,6 +68,7 @@ const mapBlockTransaction = (
   signature: dbTransaction.signature,
   type: transactionTypeMap[dbTransaction.type],
   details: JSON.parse(dbTransaction.details),
+  block,
 });
 
 export const getPendingTransactionById = async (
@@ -162,12 +166,24 @@ export const getBlockTransactionById = async (
     dbClient,
     dbTransaction.from
   )) as Participant | undefined;
+
   const toParticipant = (await getParticipantById(
     dbClient,
     dbTransaction.to
   )) as Participant;
 
-  return mapBlockTransaction(dbTransaction, fromParticipant, toParticipant);
+  const block = (await getBlockById(
+    dbClient,
+    dbTransaction.blockId,
+    true
+  )) as Block;
+
+  return mapBlockTransaction(
+    dbTransaction,
+    fromParticipant,
+    toParticipant,
+    block
+  );
 };
 
 export const getPendingTransactions = async (
@@ -304,15 +320,23 @@ export const getBlockTransactions = async (
           dbClient,
           dbTransaction.from
         )) as Participant | undefined;
+
         const toParticipant = (await getParticipantById(
           dbClient,
           dbTransaction.to
         )) as Participant;
 
+        const block = (await getBlockById(
+          dbClient,
+          dbTransaction.blockId,
+          true
+        )) as Block;
+
         return mapBlockTransaction(
           dbTransaction,
           fromParticipant,
-          toParticipant
+          toParticipant,
+          block
         );
       })
     ),
