@@ -1,17 +1,9 @@
-import {
-  Participant,
-  ParticipantKey,
-  ParticipantRole,
-} from "@xilution/todd-coin-types";
+import { Participant, ParticipantRole } from "@xilution/todd-coin-types";
 import { DbClient } from "./db-client";
 import { Model } from "sequelize";
 import { v4 } from "uuid";
 import { OrganizationParticipantRef, ParticipantInstance } from "./types";
-import {
-  createParticipantKey,
-  getParticipantKeys,
-} from "./participant-keys-broker";
-import { keyUtils } from "@xilution/todd-coin-utils";
+import { getParticipantKeys } from "./participant-keys-broker";
 import { buildWhere } from "./broker-utils";
 import { DEFAULT_PAGE_SIZE } from "@xilution/todd-coin-constants";
 import { getOrganizations } from "./organizations-broker";
@@ -171,12 +163,6 @@ export const createParticipant = async (
   });
 
   const dbParticipant = model.get();
-
-  const createdParticipant: Participant = map(dbParticipant);
-
-  const newParticipantKey: ParticipantKey = keyUtils.generateParticipantKey();
-
-  await createParticipantKey(dbClient, createdParticipant, newParticipantKey);
 
   return await appendRelations(dbClient, dbParticipant);
 };
