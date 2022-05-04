@@ -60,7 +60,8 @@ const appendRelations = async (
 
 export const getParticipantById = async (
   dbClient: DbClient,
-  id: string
+  id: string,
+  skipRelations?: boolean
 ): Promise<Participant | undefined> => {
   const participantModel = dbClient.sequelize?.models.Participant;
 
@@ -75,6 +76,10 @@ export const getParticipantById = async (
   }
 
   const dbParticipant = model.get();
+
+  if (skipRelations) {
+    return map(dbParticipant);
+  }
 
   return await appendRelations(dbClient, dbParticipant);
 };

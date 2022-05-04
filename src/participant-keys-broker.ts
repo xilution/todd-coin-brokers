@@ -23,7 +23,8 @@ const appendRelations = async (
 ) => {
   const participant = await getParticipantById(
     dbClient,
-    dbParticipantKey.participantId
+    dbParticipantKey.participantId,
+    true
   );
 
   return { ...map(dbParticipantKey), participant };
