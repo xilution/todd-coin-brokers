@@ -95,11 +95,12 @@ export const getPendingTransactionById = async (
 
   const fromParticipant = (await getParticipantById(
     dbClient,
-    dbTransaction.from
+    dbTransaction.fromParticipantId
   )) as Participant | undefined;
+
   const toParticipant = (await getParticipantById(
     dbClient,
-    dbTransaction.to
+    dbTransaction.toParticipantId
   )) as Participant;
 
   return mapPendingTransaction(dbTransaction, fromParticipant, toParticipant);
@@ -129,11 +130,12 @@ export const getSignedTransactionById = async (
 
   const fromParticipant = (await getParticipantById(
     dbClient,
-    dbTransaction.from
+    dbTransaction.fromParticipantId
   )) as Participant | undefined;
+
   const toParticipant = (await getParticipantById(
     dbClient,
-    dbTransaction.to
+    dbTransaction.toParticipantId
   )) as Participant;
 
   return mapSignedTransaction(dbTransaction, fromParticipant, toParticipant);
@@ -164,12 +166,12 @@ export const getBlockTransactionById = async (
 
   const fromParticipant = (await getParticipantById(
     dbClient,
-    dbTransaction.from
+    dbTransaction.fromParticipantId
   )) as Participant | undefined;
 
   const toParticipant = (await getParticipantById(
     dbClient,
-    dbTransaction.to
+    dbTransaction.toParticipantId
   )) as Participant;
 
   const block = (await getBlockById(
@@ -220,11 +222,12 @@ export const getPendingTransactions = async (
 
         const fromParticipant = (await getParticipantById(
           dbClient,
-          dbTransaction.from
+          dbTransaction.fromParticipantId
         )) as Participant | undefined;
+
         const toParticipant = (await getParticipantById(
           dbClient,
-          dbTransaction.to
+          dbTransaction.toParticipantId
         )) as Participant;
 
         return mapPendingTransaction(
@@ -271,11 +274,12 @@ export const getSignedTransactions = async (
 
         const fromParticipant = (await getParticipantById(
           dbClient,
-          dbTransaction.from
+          dbTransaction.fromParticipantId
         )) as Participant | undefined;
+
         const toParticipant = (await getParticipantById(
           dbClient,
-          dbTransaction.to
+          dbTransaction.toParticipantId
         )) as Participant;
 
         return mapSignedTransaction(
@@ -318,12 +322,12 @@ export const getBlockTransactions = async (
 
         const fromParticipant = (await getParticipantById(
           dbClient,
-          dbTransaction.from
+          dbTransaction.fromParticipantId
         )) as Participant | undefined;
 
         const toParticipant = (await getParticipantById(
           dbClient,
-          dbTransaction.to
+          dbTransaction.toParticipantId
         )) as Participant;
 
         const block = (await getBlockById(
@@ -367,11 +371,12 @@ export const createPendingTransaction = async (
 
   const fromParticipant = (await getParticipantById(
     dbClient,
-    dbTransaction.from
+    dbTransaction.fromParticipantId
   )) as Participant | undefined;
+
   const toParticipant = (await getParticipantById(
     dbClient,
-    dbTransaction.to
+    dbTransaction.toParticipantId
   )) as Participant;
 
   return mapPendingTransaction(dbTransaction, fromParticipant, toParticipant);
@@ -438,11 +443,12 @@ export const createSignedTransaction = async (
 
   const fromParticipant = (await getParticipantById(
     dbClient,
-    dbTransaction.from
+    dbTransaction.fromParticipantId
   )) as Participant | undefined;
+
   const toParticipant = (await getParticipantById(
     dbClient,
-    dbTransaction.to
+    dbTransaction.toParticipantId
   )) as Participant;
 
   return mapSignedTransaction(dbTransaction, fromParticipant, toParticipant);
