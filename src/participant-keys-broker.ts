@@ -123,7 +123,7 @@ export const createParticipantKey = async (
   };
 };
 
-export const deactivateParticipantKey = async (
+export const updateParticipantKey = async (
   dbClient: DbClient,
   updatedParticipantKey: ParticipantKey
 ): Promise<void> => {
@@ -133,15 +133,18 @@ export const deactivateParticipantKey = async (
     return;
   }
 
-  // todo - check to see if the effective to is greater than today and that the effective from is in the past
+  const { id, effective } = updatedParticipantKey;
+  const { from, to } = effective;
 
   await participantKeyModel.update(
     {
-      effectiveTo: dayjs().toISOString(),
+      effectiveFrom: from,
+      effectiveTo: to,
+      publicKey: updatedParticipantKey.public,
     },
     {
       where: {
-        id: updatedParticipantKey.id,
+        id,
       },
     }
   );
