@@ -1,3 +1,10 @@
+## [3.0.2](https://github.com/xilution/todd-coin-brokers/compare/v3.0.1...v3.0.2) (2022-05-04)
+
+
+### Bug Fixes
+
+* added relations to participant key broker ([e5c763f](https://github.com/xilution/todd-coin-brokers/commit/e5c763f8aac3ad0b4658763c6ddf64c3bdc7f9f9))
+
 ## [3.0.1](https://github.com/xilution/todd-coin-brokers/compare/v3.0.0...v3.0.1) (2022-05-04)
 
 
