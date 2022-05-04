@@ -1,3 +1,15 @@
+# [3.0.0](https://github.com/xilution/todd-coin-brokers/compare/v2.4.1...v3.0.0) (2022-05-04)
+
+
+### Features
+
+* added updateParticipantKey function ([32ff9ab](https://github.com/xilution/todd-coin-brokers/commit/32ff9ab7f80b1f8ca27095f0b1fb56998a6fa085))
+
+
+### BREAKING CHANGES
+
+* removed deactivateParticipantKey
+
 ## [2.4.1](https://github.com/xilution/todd-coin-brokers/compare/v2.4.0...v2.4.1) (2022-05-04)
 
 
