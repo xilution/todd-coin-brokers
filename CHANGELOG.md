@@ -1,3 +1,10 @@
+## [3.0.3](https://github.com/xilution/todd-coin-brokers/compare/v3.0.2...v3.0.3) (2022-05-04)
+
+
+### Bug Fixes
+
+* fixed infinite loop ([cd26120](https://github.com/xilution/todd-coin-brokers/commit/cd261209aa3eb0fe3e16daba4a4c5c6938312626))
+
 ## [3.0.2](https://github.com/xilution/todd-coin-brokers/compare/v3.0.1...v3.0.2) (2022-05-04)
 
 
