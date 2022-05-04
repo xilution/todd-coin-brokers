@@ -4,6 +4,7 @@ import { v4 } from "uuid";
 import { ParticipantKeyInstance } from "./types";
 import { Model } from "sequelize";
 import dayjs from "dayjs";
+import { getParticipantById } from "./participants-broker";
 
 const map = (dbParticipantKey: ParticipantKeyInstance): ParticipantKey => ({
   id: dbParticipantKey.id,
@@ -15,6 +16,18 @@ const map = (dbParticipantKey: ParticipantKeyInstance): ParticipantKey => ({
     to: dbParticipantKey.effectiveTo,
   },
 });
+
+const appendRelations = async (
+  dbClient: DbClient,
+  dbParticipantKey: ParticipantKeyInstance
+) => {
+  const participant = await getParticipantById(
+    dbClient,
+    dbParticipantKey.participantId
+  );
+
+  return { ...map(dbParticipantKey), participant };
+};
 
 export const getParticipantKeyById = async (
   dbClient: DbClient,
@@ -34,7 +47,7 @@ export const getParticipantKeyById = async (
 
   const dbParticipantKey = model.get();
 
-  return map(dbParticipantKey);
+  return appendRelations(dbClient, dbParticipantKey);
 };
 
 export const getEffectiveParticipantKeyByParticipant = async (
@@ -56,13 +69,19 @@ export const getEffectiveParticipantKeyByParticipant = async (
 
   const now = dayjs();
 
-  return models
-    .map((model: Model) => map(model.get()))
+  const dbParticipantKey: ParticipantKeyInstance | undefined = models
+    .map((model: Model) => model.get())
     .find(
-      (participantKey: ParticipantKey) =>
-        dayjs(participantKey.effective.from).isBefore(now) &&
-        dayjs(participantKey.effective.to).isAfter(now)
+      (participantKeyInstance: ParticipantKeyInstance) =>
+        dayjs(participantKeyInstance.effectiveFrom).isBefore(now) &&
+        dayjs(participantKeyInstance.effectiveTo).isAfter(now)
     );
+
+  if (dbParticipantKey === undefined) {
+    return;
+  }
+
+  return appendRelations(dbClient, dbParticipantKey);
 };
 
 export const getParticipantKeys = async (
@@ -88,11 +107,13 @@ export const getParticipantKeys = async (
 
   return {
     count,
-    rows: rows.map((model: Model<ParticipantKeyInstance>) => {
-      const dbParticipantKey = model.get();
+    rows: await Promise.all(
+      rows.map((model: Model<ParticipantKeyInstance>) => {
+        const dbParticipantKey = model.get();
 
-      return map(dbParticipantKey);
-    }),
+        return appendRelations(dbClient, dbParticipantKey);
+      })
+    ),
   };
 };
 
@@ -117,10 +138,7 @@ export const createParticipantKey = async (
 
   const dbParticipantKey = model.get();
 
-  return {
-    ...map(dbParticipantKey),
-    participant,
-  };
+  return appendRelations(dbClient, dbParticipantKey);
 };
 
 export const updateParticipantKey = async (
