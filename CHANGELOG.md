@@ -1,3 +1,10 @@
+## [3.0.1](https://github.com/xilution/todd-coin-brokers/compare/v3.0.0...v3.0.1) (2022-05-04)
+
+
+### Bug Fixes
+
+* removed key generation from create participant ([e078143](https://github.com/xilution/todd-coin-brokers/commit/e0781433443580304f47feeb8639f30f3709c6f2))
+
 # [3.0.0](https://github.com/xilution/todd-coin-brokers/compare/v2.4.1...v3.0.0) (2022-05-04)
 
 
