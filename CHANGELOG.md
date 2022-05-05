@@ -1,3 +1,10 @@
+## [3.1.1](https://github.com/xilution/todd-coin-brokers/compare/v3.1.0...v3.1.1) (2022-05-05)
+
+
+### Bug Fixes
+
+* conditionally create mining reward if the mminerParticipantId is set ([ae421c5](https://github.com/xilution/todd-coin-brokers/commit/ae421c5ce0e2a52e530c4fa11a6e49bc5ff8d606))
+
 # [3.1.0](https://github.com/xilution/todd-coin-brokers/compare/v3.0.3...v3.1.0) (2022-05-05)
 
 
