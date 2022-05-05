@@ -133,7 +133,7 @@ export const getBlocks = async (
 export const createBlock = async (
   dbClient: DbClient,
   newBlock: Block,
-  minerParticipantId: string
+  minerParticipantId?: string
 ): Promise<Block | undefined> => {
   return await dbClient.transaction<Block | undefined>(async () => {
     const blockModel = dbClient.sequelize?.models.Block;
@@ -171,22 +171,24 @@ export const createBlock = async (
 
     const now = dayjs();
 
-    await transactionModel.create({
-      id: v4(),
-      state: "signed",
-      type: _.toLower(TransactionType.TIME),
-      toParticipantId: minerParticipantId,
-      goodPoints: MINING_REWARD,
-      description: "Mining reward",
-      details: JSON.stringify({
-        dateRanges: [
-          {
-            from: now.toISOString(),
-            to: now.toISOString(),
-          },
-        ],
-      }),
-    });
+    if (minerParticipantId !== undefined) {
+      await transactionModel.create({
+        id: v4(),
+        state: "signed",
+        type: _.toLower(TransactionType.TIME),
+        toParticipantId: minerParticipantId,
+        goodPoints: MINING_REWARD,
+        description: "Mining reward",
+        details: JSON.stringify({
+          dateRanges: [
+            {
+              from: now.toISOString(),
+              to: now.toISOString(),
+            },
+          ],
+        }),
+      });
+    }
 
     const dbBlock = model.get();
 
