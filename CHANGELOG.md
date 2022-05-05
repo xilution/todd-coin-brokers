@@ -1,3 +1,10 @@
+# [3.1.0](https://github.com/xilution/todd-coin-brokers/compare/v3.0.3...v3.1.0) (2022-05-05)
+
+
+### Features
+
+* bumped todd-coin-types and todd-coin-utils versions ([2faaf63](https://github.com/xilution/todd-coin-brokers/commit/2faaf63553de6d16ec53b3a0545f178c72676711))
+
 ## [3.0.3](https://github.com/xilution/todd-coin-brokers/compare/v3.0.2...v3.0.3) (2022-05-04)
 
 
