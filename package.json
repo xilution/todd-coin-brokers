@@ -32,8 +32,8 @@
   "types": "dist/index.d.ts",
   "dependencies": {
     "@xilution/todd-coin-constants": "^2.0.0",
-    "@xilution/todd-coin-types": "^2.2.2",
-    "@xilution/todd-coin-utils": "^5.3.0",
+    "@xilution/todd-coin-types": "^2.3.0",
+    "@xilution/todd-coin-utils": "^5.4.0",
     "dayjs": "^1.11.1",
     "lodash": "^4.17.21",
     "pg": "^8.7.3",
