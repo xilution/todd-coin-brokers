@@ -1,3 +1,17 @@
+# [3.2.0](https://github.com/xilution/todd-coin-brokers/compare/v3.1.1...v3.2.0) (2022-05-06)
+
+
+### Bug Fixes
+
+* improved multiple participant found for email error ([cad1d29](https://github.com/xilution/todd-coin-brokers/commit/cad1d2911a7f222219c6e817cfec0e8f6f684f71))
+
+
+### Features
+
+* bumped todd-coin-types and todd-coin-utils versions ([b05cdbb](https://github.com/xilution/todd-coin-brokers/commit/b05cdbbef4d8e8f5da7d12331fbde4a8c889f6eb))
+* made organization email nullable ([be55977](https://github.com/xilution/todd-coin-brokers/commit/be5597762fc01709624ee87044ac0149b85b693f))
+* made participant password nullable ([bf8292a](https://github.com/xilution/todd-coin-brokers/commit/bf8292ac43db07457f38facd515f60a7e1fd77c1))
+
 ## [3.1.1](https://github.com/xilution/todd-coin-brokers/compare/v3.1.0...v3.1.1) (2022-05-05)
 
 
