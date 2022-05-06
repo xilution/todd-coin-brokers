@@ -15,6 +15,7 @@ import { BlockInstance } from "./types";
 import { Model } from "sequelize";
 import _ from "lodash";
 import dayjs from "dayjs";
+import { buildWhere } from "./broker-utils";
 
 const map = (dbBlock: BlockInstance): Block => ({
   id: dbBlock.id,
@@ -108,7 +109,11 @@ export const getLatestBlock = async (
 export const getBlocks = async (
   dbClient: DbClient,
   pageNumber: number,
-  pageSize: number
+  pageSize: number,
+  searchCriteria?: {
+    ids?: string[];
+    sequenceId?: number;
+  }
 ): Promise<{ count: number; rows: Block[] }> => {
   const blockModel = dbClient.sequelize?.models.Block;
 
@@ -117,6 +122,7 @@ export const getBlocks = async (
   }
 
   const { count, rows } = await blockModel.findAndCountAll({
+    where: buildWhere(searchCriteria),
     offset: pageNumber * pageSize,
     order: [["sequenceId", "ASC"]],
     limit: pageSize,

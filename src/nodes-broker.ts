@@ -3,6 +3,7 @@ import { DbClient } from "./db-client";
 import { v4 } from "uuid";
 import { NodeInstance } from "./types";
 import { Model } from "sequelize";
+import { buildWhere } from "./broker-utils";
 
 const map = (dbNode: NodeInstance): Node => ({
   id: dbNode.id,
@@ -37,7 +38,11 @@ export const getNodeById = async (
 export const getNodes = async (
   dbClient: DbClient,
   pageNumber: number,
-  pageSize: number
+  pageSize: number,
+  searchCriteria?: {
+    ids?: string[];
+    baseUrl?: string;
+  }
 ): Promise<{ count: number; rows: Node[] }> => {
   const nodeModel = dbClient.sequelize?.models.Node;
 
@@ -46,6 +51,7 @@ export const getNodes = async (
   }
 
   const { count, rows } = await nodeModel.findAndCountAll({
+    where: buildWhere(searchCriteria),
     offset: pageNumber * pageSize,
     order: [["createdAt", "DESC"]],
     limit: pageSize,

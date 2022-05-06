@@ -5,6 +5,7 @@ import { ParticipantKeyInstance } from "./types";
 import { Model } from "sequelize";
 import dayjs from "dayjs";
 import { getParticipantById } from "./participants-broker";
+import { buildWhere } from "./broker-utils";
 
 const map = (dbParticipantKey: ParticipantKeyInstance): ParticipantKey => ({
   id: dbParticipantKey.id,
@@ -93,7 +94,11 @@ export const getParticipantKeys = async (
   dbClient: DbClient,
   pageNumber: number,
   pageSize: number,
-  participantId: string
+  participantId: string,
+  searchCriteria?: {
+    ids?: string[];
+    public?: string;
+  }
 ): Promise<{ count: number; rows: ParticipantKey[] }> => {
   const nodeModel = dbClient.sequelize?.models.ParticipantKey;
 
@@ -103,6 +108,7 @@ export const getParticipantKeys = async (
 
   const { count, rows } = await nodeModel.findAndCountAll({
     where: {
+      ...buildWhere(searchCriteria),
       participantId,
     },
     offset: pageNumber * pageSize,

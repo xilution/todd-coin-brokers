@@ -198,8 +198,12 @@ export const getPendingTransactions = async (
   dbClient: DbClient,
   pageNumber: number,
   pageSize: number,
-  from?: string,
-  to?: string
+  searchCriteria?: {
+    ids?: string[];
+    fromParticipantId?: string;
+    toParticipantId?: string;
+    type: string;
+  }
 ): Promise<{
   count: number;
   rows: PendingTransaction<TransactionDetails>[];
@@ -212,7 +216,7 @@ export const getPendingTransactions = async (
 
   const { count, rows } = await transactionModel.findAndCountAll({
     where: {
-      ...buildWhere({ from, to }),
+      ...buildWhere(searchCriteria),
       state: "pending",
     },
     offset: pageNumber * pageSize,
@@ -250,8 +254,12 @@ export const getSignedTransactions = async (
   dbClient: DbClient,
   pageNumber: number,
   pageSize: number,
-  from?: string,
-  to?: string
+  searchCriteria?: {
+    ids?: string[];
+    fromParticipantId?: string;
+    toParticipantId?: string;
+    type: string;
+  }
 ): Promise<{
   count: number;
   rows: SignedTransaction<TransactionDetails>[];
@@ -264,7 +272,7 @@ export const getSignedTransactions = async (
 
   const { count, rows } = await transactionModel.findAndCountAll({
     where: {
-      ...buildWhere({ from, to }),
+      ...buildWhere(searchCriteria),
       state: "signed",
     },
     offset: pageNumber * pageSize,
@@ -302,7 +310,13 @@ export const getBlockTransactions = async (
   dbClient: DbClient,
   pageNumber: number,
   pageSize: number,
-  blockId: string
+  blockId: string,
+  searchCriteria?: {
+    ids?: string[];
+    fromParticipantId?: string;
+    toParticipantId?: string;
+    type: string;
+  }
 ): Promise<{ count: number; rows: BlockTransaction<TransactionDetails>[] }> => {
   const transactionModel = dbClient.sequelize?.models.Transaction;
 
@@ -312,6 +326,7 @@ export const getBlockTransactions = async (
 
   const { count, rows } = await transactionModel.findAndCountAll({
     where: {
+      ...buildWhere(searchCriteria),
       blockId,
       state: "block",
     },

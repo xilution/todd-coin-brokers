@@ -31,7 +31,8 @@ const appendRelations = async (
     dbClient,
     0,
     DEFAULT_PAGE_SIZE,
-    dbParticipant.id
+    dbParticipant.id,
+    {}
   );
 
   const getOrganizationParticipantRefResponse =
@@ -44,11 +45,13 @@ const appendRelations = async (
     dbClient,
     0,
     DEFAULT_PAGE_SIZE,
-    getOrganizationParticipantRefResponse.rows.reduce(
-      (ids: string[], row: OrganizationParticipantRef) =>
-        row.id ? ids.concat(row.id) : ids,
-      []
-    )
+    {
+      ids: getOrganizationParticipantRefResponse.rows.reduce(
+        (ids: string[], row: OrganizationParticipantRef) =>
+          row.id ? ids.concat(row.id) : ids,
+        []
+      ),
+    }
   );
 
   return {
@@ -86,44 +89,17 @@ export const getParticipantById = async (
   return await appendRelations(dbClient, dbParticipant);
 };
 
-export const getParticipantByEmail = async (
-  dbClient: DbClient,
-  email: string
-): Promise<Participant | undefined> => {
-  const participantModel = dbClient.sequelize?.models.Participant;
-
-  if (participantModel === undefined) {
-    throw new Error(
-      "unable to get a participant by email because the participant model is undefined"
-    );
-  }
-
-  const { count, rows } = await participantModel.findAndCountAll({
-    where: {
-      email,
-    },
-  });
-
-  if (count > 1) {
-    throw Error(
-      `unable to get a participant by email because more then one participant is associated with the email: ${email}`
-    );
-  }
-
-  if (count === 0) {
-    return;
-  }
-
-  const dbParticipant = rows[0].get();
-
-  return await appendRelations(dbClient, dbParticipant);
-};
-
 export const getParticipants = async (
   dbClient: DbClient,
   pageNumber: number,
   pageSize: number,
-  ids?: string[]
+  searchCriteria?: {
+    ids?: string[];
+    email?: string;
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+  }
 ): Promise<{ count: number; rows: Participant[] }> => {
   const participantModel = dbClient.sequelize?.models.Participant;
 
@@ -132,7 +108,7 @@ export const getParticipants = async (
   }
 
   const { count, rows } = await participantModel.findAndCountAll({
-    where: buildWhere({ ids }),
+    where: buildWhere(searchCriteria),
     offset: pageNumber * pageSize,
     order: [["createdAt", "DESC"]],
     limit: pageSize,

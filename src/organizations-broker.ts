@@ -1,4 +1,7 @@
-import { Organization, OrganizationRole } from "@xilution/todd-coin-types";
+import {
+  Organization,
+  OrganizationRole,
+} from "@xilution/todd-coin-types";
 import { DbClient } from "./db-client";
 import { v4 } from "uuid";
 import { OrganizationInstance, OrganizationParticipantRef } from "./types";
@@ -31,11 +34,13 @@ const appendRelations = async (
     dbClient,
     0,
     DEFAULT_PAGE_SIZE,
-    getOrganizationParticipantRefResponse.rows.reduce(
-      (ids: string[], row: OrganizationParticipantRef) =>
-        row.id ? ids.concat(row.id) : ids,
-      []
-    )
+    {
+      ids: getOrganizationParticipantRefResponse.rows.reduce(
+        (ids: string[], row: OrganizationParticipantRef) =>
+          row.id ? ids.concat(row.id) : ids,
+        []
+      ),
+    }
   );
 
   return { ...map(dbOrganization), participants: participantsResponse.rows };
@@ -68,7 +73,12 @@ export const getOrganizations = async (
   dbClient: DbClient,
   pageNumber: number,
   pageSize: number,
-  ids?: string[]
+  searchCriteria?: {
+    ids?: string[];
+    name?: string;
+    phone?: string;
+    url?: string;
+  }
 ): Promise<{ count: number; rows: Organization[] }> => {
   const organizationModel = dbClient.sequelize?.models.Organization;
 
@@ -77,7 +87,7 @@ export const getOrganizations = async (
   }
 
   const { count, rows } = await organizationModel.findAndCountAll({
-    where: buildWhere({ ids }),
+    where: buildWhere(searchCriteria),
     offset: pageNumber * pageSize,
     order: [["createdAt", "DESC"]],
     limit: pageSize,
