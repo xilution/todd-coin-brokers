@@ -102,7 +102,7 @@ export const getParticipantByEmail = async (
 
   if (count > 1) {
     throw Error(
-      `unable to get participant by email because more then one participant is associated with the email: ${email}`
+      `unable to get a participant by email because more then one participant is associated with the email: ${email}`
     );
   }
 
