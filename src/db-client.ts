@@ -58,7 +58,7 @@ export class DbClient {
         },
         email: {
           type: DataTypes.STRING,
-          allowNull: false,
+          allowNull: true,
         },
         roles: {
           type: DataTypes.ARRAY(DataTypes.STRING),
