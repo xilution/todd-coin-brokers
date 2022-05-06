@@ -114,7 +114,7 @@ export class DbClient {
         },
         password: {
           type: DataTypes.STRING,
-          allowNull: false,
+          allowNull: true,
         },
         firstName: {
           type: DataTypes.STRING,
