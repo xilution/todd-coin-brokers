@@ -66,7 +66,9 @@ export const getParticipantById = async (
   const participantModel = dbClient.sequelize?.models.Participant;
 
   if (participantModel === undefined) {
-    return;
+    throw new Error(
+      "unable to get a participant by id because the participant model is undefined"
+    );
   }
 
   const model = await participantModel.findByPk(id);
@@ -91,7 +93,9 @@ export const getParticipantByEmail = async (
   const participantModel = dbClient.sequelize?.models.Participant;
 
   if (participantModel === undefined) {
-    return;
+    throw new Error(
+      "unable to get a participant by email because the participant model is undefined"
+    );
   }
 
   const { count, rows } = await participantModel.findAndCountAll({
@@ -151,10 +155,11 @@ export const createParticipant = async (
   newParticipant: Participant
 ): Promise<Participant | undefined> => {
   const participantModel = dbClient.sequelize?.models.Participant;
-  const participantKeyModel = dbClient.sequelize?.models.ParticipantKey;
 
-  if (participantModel === undefined || participantKeyModel === undefined) {
-    return;
+  if (participantModel === undefined) {
+    throw new Error(
+      "unable to create a participant because the participant model is undefined"
+    );
   }
 
   const model = await participantModel.create({
@@ -179,7 +184,9 @@ export const updateParticipant = async (
   const participantModel = dbClient.sequelize?.models.Participant;
 
   if (participantModel === undefined) {
-    return;
+    throw new Error(
+      "unable to update a participant because the participant model is undefined"
+    );
   }
 
   const { id, email, password, firstName, lastName, phone, roles } =

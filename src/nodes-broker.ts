@@ -18,7 +18,9 @@ export const getNodeById = async (
   const nodeModel = dbClient.sequelize?.models.Node;
 
   if (nodeModel === undefined) {
-    return;
+    throw new Error(
+      "unable to get node by id because the node model is undefined"
+    );
   }
 
   const model = await nodeModel.findByPk(id);
@@ -66,7 +68,9 @@ export const createNode = async (
   const nodeModel = dbClient.sequelize?.models.Node;
 
   if (nodeModel === undefined) {
-    return;
+    throw new Error(
+      "unable to create a node because the node model is undefined"
+    );
   }
 
   const model = await nodeModel.create({
@@ -86,7 +90,9 @@ export const updateNode = async (
   const nodeModel = dbClient.sequelize?.models.Node;
 
   if (nodeModel === undefined) {
-    return;
+    throw new Error(
+      "unable to update a node because the node model is undefined"
+    );
   }
 
   const { id, baseUrl } = updatedNode;

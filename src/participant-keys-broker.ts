@@ -34,13 +34,15 @@ export const getParticipantKeyById = async (
   dbClient: DbClient,
   id: string
 ): Promise<ParticipantKey | undefined> => {
-  const nodeModel = dbClient.sequelize?.models.ParticipantKey;
+  const participantKeyModel = dbClient.sequelize?.models.ParticipantKey;
 
-  if (nodeModel === undefined) {
-    return;
+  if (participantKeyModel === undefined) {
+    throw new Error(
+      "unable to get a participant key by id because the participant key model is undefined"
+    );
   }
 
-  const model = await nodeModel.findByPk(id);
+  const model = await participantKeyModel.findByPk(id);
 
   if (!model) {
     return;
@@ -58,7 +60,9 @@ export const getEffectiveParticipantKeyByParticipant = async (
   const participantKeyModel = dbClient.sequelize?.models.ParticipantKey;
 
   if (participantKeyModel === undefined) {
-    return;
+    throw new Error(
+      "unable to get the effective participant key by participant because the participant key model is undefined"
+    );
   }
 
   const models: Model[] = await participantKeyModel.findAll({
@@ -126,7 +130,9 @@ export const createParticipantKey = async (
   const nodeModel = dbClient.sequelize?.models.ParticipantKey;
 
   if (nodeModel === undefined) {
-    return;
+    throw new Error(
+      "unable to create a participant key because the participant key model is undefined"
+    );
   }
 
   const model = await nodeModel.create({
@@ -149,7 +155,9 @@ export const updateParticipantKey = async (
   const participantKeyModel = dbClient.sequelize?.models.ParticipantKey;
 
   if (participantKeyModel === undefined) {
-    return;
+    throw new Error(
+      "unable to update a participant key because the participant key model is undefined"
+    );
   }
 
   const { id, effective } = updatedParticipantKey;

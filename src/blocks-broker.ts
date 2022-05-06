@@ -49,7 +49,9 @@ export const getBlockById = async (
   const blockModel = dbClient.sequelize?.models.Block;
 
   if (blockModel === undefined) {
-    return;
+    throw new Error(
+      "unable to get block by id because the block model is undefined"
+    );
   }
 
   const model = await blockModel.findByPk(id);
@@ -73,7 +75,9 @@ export const getLatestBlock = async (
   const blockModel = dbClient.sequelize?.models.Block;
 
   if (blockModel === undefined) {
-    return;
+    throw new Error(
+      "unable to get latest block because the block model is undefined"
+    );
   }
 
   const maxSequenceId: number = await blockModel.max("sequenceId");
@@ -140,7 +144,9 @@ export const createBlock = async (
     const transactionModel = dbClient.sequelize?.models.Transaction;
 
     if (blockModel === undefined || transactionModel === undefined) {
-      return;
+      throw new Error(
+        "unable to create a block because the block model or the transaction model are undefined"
+      );
     }
 
     const model = await blockModel.create({

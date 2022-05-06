@@ -78,7 +78,9 @@ export const getPendingTransactionById = async (
   const transactionModel = dbClient.sequelize?.models.Transaction;
 
   if (transactionModel === undefined) {
-    return;
+    throw new Error(
+      "unable to get a pending transaction by id because the transaction model is undefined"
+    );
   }
 
   const model = await transactionModel.findByPk(pendingTransactionId);
@@ -113,7 +115,9 @@ export const getSignedTransactionById = async (
   const transactionModel = dbClient.sequelize?.models.Transaction;
 
   if (transactionModel === undefined) {
-    return;
+    throw new Error(
+      "unable to get a signed transaction by id because the transaction model is undefined"
+    );
   }
 
   const model = await transactionModel.findByPk(signedTransactionId);
@@ -149,7 +153,9 @@ export const getBlockTransactionById = async (
   const transactionModel = dbClient.sequelize?.models.Transaction;
 
   if (transactionModel === undefined) {
-    return;
+    throw new Error(
+      "unable to get a block transaction by id because the transaction model is undefined"
+    );
   }
 
   const model = await transactionModel.findByPk(blockTransactionId);
@@ -354,7 +360,9 @@ export const createPendingTransaction = async (
   const transactionModel = dbClient.sequelize?.models.Transaction;
 
   if (transactionModel === undefined) {
-    return;
+    throw new Error(
+      "unable to create a pending transaction because the transaction model is undefined"
+    );
   }
 
   const model = await transactionModel.create({
@@ -389,7 +397,9 @@ export const updatePendingTransaction = async (
   const transactionModel = dbClient.sequelize?.models.Transaction;
 
   if (transactionModel === undefined) {
-    return;
+    throw new Error(
+      "unable to update a pending transaction because the transaction model is undefined"
+    );
   }
 
   const { id, details } = updatedPendingTransaction;
@@ -414,7 +424,9 @@ export const createSignedTransaction = async (
   const transactionModel = dbClient.sequelize?.models.Transaction;
 
   if (transactionModel === undefined) {
-    return;
+    throw new Error(
+      "unable to create a pending transaction because the transaction model is undefined"
+    );
   }
 
   const { id, signature, goodPoints } = newSignedTransaction;
@@ -461,7 +473,9 @@ export const updateSignedTransaction = async (
   const transactionModel = dbClient.sequelize?.models.Transaction;
 
   if (transactionModel === undefined) {
-    return;
+    throw new Error(
+      "unable to update a pending transaction because the transaction model is undefined"
+    );
   }
 
   const { id, signature, goodPoints } = updatedSignedTransaction;
@@ -487,7 +501,9 @@ export const deletePendingTransactionById = async (
   const transactionModel = dbClient.sequelize?.models.Transaction;
 
   if (transactionModel === undefined) {
-    return;
+    throw new Error(
+      "unable to delete a pending transaction because the transaction model is undefined"
+    );
   }
 
   await transactionModel.destroy({

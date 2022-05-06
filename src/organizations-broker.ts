@@ -48,7 +48,9 @@ export const getOrganizationById = async (
   const organizationModel = dbClient.sequelize?.models.Organization;
 
   if (organizationModel === undefined) {
-    return;
+    throw new Error(
+      "unable to get an organization by id because the organization model is undefined"
+    );
   }
 
   const model = await organizationModel.findByPk(id);
@@ -100,7 +102,9 @@ export const createOrganization = async (
   const organizationModel = dbClient.sequelize?.models.Organization;
 
   if (organizationModel === undefined) {
-    return;
+    throw new Error(
+      "unable to create an organization because the organization model is undefined"
+    );
   }
 
   const model = await organizationModel.create({
@@ -122,7 +126,9 @@ export const updateOrganization = async (
   const organizationModel = dbClient.sequelize?.models.Organization;
 
   if (organizationModel === undefined) {
-    return;
+    throw new Error(
+      "unable to update an organization because the organization model is undefined"
+    );
   }
 
   const { id, email, name, phone, url, roles } = updatedOrganization;

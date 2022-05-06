@@ -24,7 +24,9 @@ export const getOrganizationParticipantRefById = async (
     dbClient.sequelize?.models.OrganizationParticipantRef;
 
   if (organizationParticipantRefModel === undefined) {
-    return;
+    throw new Error(
+      "unable to get organization participant reference by id because the organization participant reference model is undefined"
+    );
   }
 
   const model = await organizationParticipantRefModel.findByPk(id);
@@ -136,7 +138,9 @@ export const createOrganizationParticipantRef = async (
   // todo - watch for dupes
 
   if (organizationParticipantRefModel === undefined) {
-    return;
+    throw new Error(
+      "unable to create an organization participant reference because the organization participant reference model is undefined"
+    );
   }
 
   const model = await organizationParticipantRefModel.create({
@@ -158,7 +162,9 @@ export const deleteOrganizationParticipantRef = async (
     dbClient.sequelize?.models.OrganizationParticipantRef;
 
   if (organizationParticipantRefModel === undefined) {
-    return;
+    throw new Error(
+      "unable to delete an organization participant reference because the organization participant reference model is undefined"
+    );
   }
 
   const { id } = organizationParticipantRef;
