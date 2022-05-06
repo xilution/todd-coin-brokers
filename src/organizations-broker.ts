@@ -1,7 +1,4 @@
-import {
-  Organization,
-  OrganizationRole,
-} from "@xilution/todd-coin-types";
+import { Organization, OrganizationRole } from "@xilution/todd-coin-types";
 import { DbClient } from "./db-client";
 import { v4 } from "uuid";
 import { OrganizationInstance, OrganizationParticipantRef } from "./types";
