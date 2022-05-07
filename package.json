@@ -1,6 +1,6 @@
 {
   "name": "@xilution/todd-coin-brokers",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "The Todd Coin Cryptocurrency Database Brokers",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",

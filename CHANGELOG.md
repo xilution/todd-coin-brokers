@@ -1,3 +1,10 @@
+## [4.0.1](https://github.com/xilution/todd-coin-brokers/compare/v4.0.0...v4.0.1) (2022-05-07)
+
+
+### Bug Fixes
+
+* made type search criteria optional ([efe3aa8](https://github.com/xilution/todd-coin-brokers/commit/efe3aa85d61d5b47065211bde3786deff01591df))
+
 # [4.0.0](https://github.com/xilution/todd-coin-brokers/compare/v3.3.0...v4.0.0) (2022-05-06)
 
 
