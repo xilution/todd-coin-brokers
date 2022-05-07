@@ -202,7 +202,7 @@ export const getPendingTransactions = async (
     ids?: string[];
     fromParticipantId?: string;
     toParticipantId?: string;
-    type: string;
+    type?: string;
   }
 ): Promise<{
   count: number;
@@ -258,7 +258,7 @@ export const getSignedTransactions = async (
     ids?: string[];
     fromParticipantId?: string;
     toParticipantId?: string;
-    type: string;
+    type?: string;
   }
 ): Promise<{
   count: number;
@@ -315,7 +315,7 @@ export const getBlockTransactions = async (
     ids?: string[];
     fromParticipantId?: string;
     toParticipantId?: string;
-    type: string;
+    type?: string;
   }
 ): Promise<{ count: number; rows: BlockTransaction<TransactionDetails>[] }> => {
   const transactionModel = dbClient.sequelize?.models.Transaction;
