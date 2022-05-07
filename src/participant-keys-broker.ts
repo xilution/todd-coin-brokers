@@ -97,7 +97,7 @@ export const getParticipantKeys = async (
   participantId: string,
   searchCriteria?: {
     ids?: string[];
-    public?: string;
+    publicKey?: string;
   }
 ): Promise<{ count: number; rows: ParticipantKey[] }> => {
   const nodeModel = dbClient.sequelize?.models.ParticipantKey;
