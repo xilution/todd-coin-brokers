@@ -1,3 +1,10 @@
+## [4.0.2](https://github.com/xilution/todd-coin-brokers/compare/v4.0.1...v4.0.2) (2022-05-07)
+
+
+### Bug Fixes
+
+* fixed getParticipantKeys search criteria ([55f71c0](https://github.com/xilution/todd-coin-brokers/commit/55f71c07a9b33f6e931ae16c9bd8d40934d44674))
+
 ## [4.0.1](https://github.com/xilution/todd-coin-brokers/compare/v4.0.0...v4.0.1) (2022-05-07)
 
 
