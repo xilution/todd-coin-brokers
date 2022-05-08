@@ -1,7 +1,9 @@
 import {
   Block,
   BlockTransaction,
+  Organization,
   Participant,
+  ParticipantKey,
   PendingTransaction,
   SignedTransaction,
   TransactionDetails,
@@ -14,6 +16,8 @@ import _ from "lodash";
 import { getParticipantById } from "./participants-broker";
 import { buildWhere } from "./broker-utils";
 import { getBlockById } from "./blocks-broker";
+import { getParticipantKeyById } from "./participant-keys-broker";
+import { getOrganizationById } from "./organizations-broker";
 
 const transactionTypeMap: { [type: string]: TransactionType } = {
   time: TransactionType.TIME,
@@ -22,54 +26,127 @@ const transactionTypeMap: { [type: string]: TransactionType } = {
 
 const mapPendingTransaction = (
   dbTransaction: TransactionInstance,
-  from: Participant | undefined,
-  to: Participant
+  fromParticipant: Participant,
+  fromOrganization: Organization,
+  toParticipant: Participant,
+  toOrganization: Organization
 ): PendingTransaction<TransactionDetails> => ({
   id: dbTransaction.id,
   createdAt: dbTransaction.createdAt,
   updatedAt: dbTransaction.updatedAt,
-  from,
-  to,
+  fromParticipant,
+  fromOrganization,
+  toParticipant,
+  toOrganization,
   description: dbTransaction.description,
   type: transactionTypeMap[dbTransaction.type],
-  details: JSON.parse(dbTransaction.details),
+  details: dbTransaction.details,
 });
 
 const mapSignedTransaction = (
   dbTransaction: TransactionInstance,
-  from: Participant | undefined,
-  to: Participant
+  fromParticipant: Participant,
+  fromOrganization: Organization,
+  toParticipant: Participant,
+  toOrganization: Organization,
+  participantKey: ParticipantKey
 ): SignedTransaction<TransactionDetails> => ({
   id: dbTransaction.id,
   createdAt: dbTransaction.createdAt,
   updatedAt: dbTransaction.updatedAt,
-  from,
-  to,
+  fromParticipant,
+  fromOrganization,
+  toParticipant,
+  toOrganization,
   description: dbTransaction.description,
   goodPoints: dbTransaction.goodPoints,
   signature: dbTransaction.signature,
+  participantKey,
   type: transactionTypeMap[dbTransaction.type],
-  details: JSON.parse(dbTransaction.details),
+  details: dbTransaction.details,
 });
 
 const mapBlockTransaction = (
   dbTransaction: TransactionInstance,
-  from: Participant | undefined,
-  to: Participant,
-  block: Block
+  fromParticipant: Participant,
+  fromOrganization: Organization,
+  toParticipant: Participant,
+  toOrganization: Organization,
+  block: Block,
+  participantKey: ParticipantKey
 ): BlockTransaction<TransactionDetails> => ({
   id: dbTransaction.id,
   createdAt: dbTransaction.createdAt,
   updatedAt: dbTransaction.updatedAt,
-  from,
-  to,
+  fromParticipant,
+  fromOrganization,
+  toParticipant,
+  toOrganization,
   goodPoints: dbTransaction.goodPoints,
   description: dbTransaction.description,
   signature: dbTransaction.signature,
+  participantKey,
   type: transactionTypeMap[dbTransaction.type],
-  details: JSON.parse(dbTransaction.details),
+  details: dbTransaction.details,
   block,
 });
+
+const getFromParticipant = async (
+  dbTransaction: TransactionInstance,
+  dbClient: DbClient
+): Promise<Participant> => {
+  return (await getParticipantById(
+    dbClient,
+    dbTransaction.fromParticipantId
+  )) as Participant;
+};
+
+const getFromOrganization = async (
+  dbTransaction: TransactionInstance,
+  dbClient: DbClient
+): Promise<Organization> => {
+  return (await getOrganizationById(
+    dbClient,
+    dbTransaction.fromOrganizationId
+  )) as Organization;
+};
+
+const getToParticipant = async (
+  dbTransaction: TransactionInstance,
+  dbClient: DbClient
+): Promise<Participant> => {
+  return (await getParticipantById(
+    dbClient,
+    dbTransaction.toParticipantId
+  )) as Participant;
+};
+
+const getToOrganization = async (
+  dbTransaction: TransactionInstance,
+  dbClient: DbClient
+): Promise<Organization> => {
+  return (await getOrganizationById(
+    dbClient,
+    dbTransaction.toOrganizationId
+  )) as Organization;
+};
+
+const getParticipantKey = async (
+  dbClient: DbClient,
+  dbTransaction: TransactionInstance
+) => {
+  return (await getParticipantKeyById(
+    dbClient,
+    dbTransaction.participantKeyId
+  )) as ParticipantKey;
+};
+
+const getBlock = async (
+  dbClient: DbClient,
+  dbTransaction: TransactionInstance
+) => {
+  return (await getBlockById(dbClient, dbTransaction.blockId, true)) as Block;
+};
 
 export const getPendingTransactionById = async (
   dbClient: DbClient,
@@ -95,17 +172,30 @@ export const getPendingTransactionById = async (
     return;
   }
 
-  const fromParticipant = (await getParticipantById(
-    dbClient,
-    dbTransaction.fromParticipantId
-  )) as Participant | undefined;
+  const fromParticipant: Participant = await getFromParticipant(
+    dbTransaction,
+    dbClient
+  );
+  const fromOrganization: Organization = await getFromOrganization(
+    dbTransaction,
+    dbClient
+  );
+  const toParticipant: Participant = await getToParticipant(
+    dbTransaction,
+    dbClient
+  );
+  const toOrganization: Organization = await getToOrganization(
+    dbTransaction,
+    dbClient
+  );
 
-  const toParticipant = (await getParticipantById(
-    dbClient,
-    dbTransaction.toParticipantId
-  )) as Participant;
-
-  return mapPendingTransaction(dbTransaction, fromParticipant, toParticipant);
+  return mapPendingTransaction(
+    dbTransaction,
+    fromParticipant,
+    fromOrganization,
+    toParticipant,
+    toOrganization
+  );
 };
 
 export const getSignedTransactionById = async (
@@ -132,17 +222,35 @@ export const getSignedTransactionById = async (
     return;
   }
 
-  const fromParticipant = (await getParticipantById(
+  const fromParticipant: Participant = await getFromParticipant(
+    dbTransaction,
+    dbClient
+  );
+  const fromOrganization: Organization = await getFromOrganization(
+    dbTransaction,
+    dbClient
+  );
+  const toParticipant: Participant = await getToParticipant(
+    dbTransaction,
+    dbClient
+  );
+  const toOrganization: Organization = await getToOrganization(
+    dbTransaction,
+    dbClient
+  );
+  const participantKey: ParticipantKey = await getParticipantKey(
     dbClient,
-    dbTransaction.fromParticipantId
-  )) as Participant | undefined;
+    dbTransaction
+  );
 
-  const toParticipant = (await getParticipantById(
-    dbClient,
-    dbTransaction.toParticipantId
-  )) as Participant;
-
-  return mapSignedTransaction(dbTransaction, fromParticipant, toParticipant);
+  return mapSignedTransaction(
+    dbTransaction,
+    fromParticipant,
+    fromOrganization,
+    toParticipant,
+    toOrganization,
+    participantKey
+  );
 };
 
 export const getBlockTransactionById = async (
@@ -170,27 +278,36 @@ export const getBlockTransactionById = async (
     return;
   }
 
-  const fromParticipant = (await getParticipantById(
+  const fromParticipant: Participant = await getFromParticipant(
+    dbTransaction,
+    dbClient
+  );
+  const fromOrganization: Organization = await getFromOrganization(
+    dbTransaction,
+    dbClient
+  );
+  const toParticipant: Participant = await getToParticipant(
+    dbTransaction,
+    dbClient
+  );
+  const toOrganization: Organization = await getToOrganization(
+    dbTransaction,
+    dbClient
+  );
+  const block: Block = await getBlock(dbClient, dbTransaction);
+  const participantKey: ParticipantKey = await getParticipantKey(
     dbClient,
-    dbTransaction.fromParticipantId
-  )) as Participant | undefined;
-
-  const toParticipant = (await getParticipantById(
-    dbClient,
-    dbTransaction.toParticipantId
-  )) as Participant;
-
-  const block = (await getBlockById(
-    dbClient,
-    dbTransaction.blockId,
-    true
-  )) as Block;
+    dbTransaction
+  );
 
   return mapBlockTransaction(
     dbTransaction,
     fromParticipant,
+    fromOrganization,
     toParticipant,
-    block
+    toOrganization,
+    block,
+    participantKey
   );
 };
 
@@ -200,8 +317,8 @@ export const getPendingTransactions = async (
   pageSize: number,
   searchCriteria?: {
     ids?: string[];
-    fromParticipantId?: string;
-    toParticipantId?: string;
+    fromId?: string;
+    toId?: string;
     type?: string;
   }
 ): Promise<{
@@ -230,20 +347,29 @@ export const getPendingTransactions = async (
       rows.map(async (model) => {
         const dbTransaction = model.get();
 
-        const fromParticipant = (await getParticipantById(
-          dbClient,
-          dbTransaction.fromParticipantId
-        )) as Participant | undefined;
-
-        const toParticipant = (await getParticipantById(
-          dbClient,
-          dbTransaction.toParticipantId
-        )) as Participant;
+        const fromParticipant: Participant = await getFromParticipant(
+          dbTransaction,
+          dbClient
+        );
+        const fromOrganization: Organization = await getFromOrganization(
+          dbTransaction,
+          dbClient
+        );
+        const toParticipant: Participant = await getToParticipant(
+          dbTransaction,
+          dbClient
+        );
+        const toOrganization: Organization = await getToOrganization(
+          dbTransaction,
+          dbClient
+        );
 
         return mapPendingTransaction(
           dbTransaction,
           fromParticipant,
-          toParticipant
+          fromOrganization,
+          toParticipant,
+          toOrganization
         );
       })
     ),
@@ -256,8 +382,8 @@ export const getSignedTransactions = async (
   pageSize: number,
   searchCriteria?: {
     ids?: string[];
-    fromParticipantId?: string;
-    toParticipantId?: string;
+    fromId?: string;
+    toId?: string;
     type?: string;
   }
 ): Promise<{
@@ -286,20 +412,34 @@ export const getSignedTransactions = async (
       rows.map(async (model) => {
         const dbTransaction = model.get();
 
-        const fromParticipant = (await getParticipantById(
+        const fromParticipant: Participant = await getFromParticipant(
+          dbTransaction,
+          dbClient
+        );
+        const fromOrganization: Organization = await getFromOrganization(
+          dbTransaction,
+          dbClient
+        );
+        const toParticipant: Participant = await getToParticipant(
+          dbTransaction,
+          dbClient
+        );
+        const toOrganization: Organization = await getToOrganization(
+          dbTransaction,
+          dbClient
+        );
+        const participantKey: ParticipantKey = await getParticipantKey(
           dbClient,
-          dbTransaction.fromParticipantId
-        )) as Participant | undefined;
-
-        const toParticipant = (await getParticipantById(
-          dbClient,
-          dbTransaction.toParticipantId
-        )) as Participant;
+          dbTransaction
+        );
 
         return mapSignedTransaction(
           dbTransaction,
           fromParticipant,
-          toParticipant
+          fromOrganization,
+          toParticipant,
+          toOrganization,
+          participantKey
         );
       })
     ),
@@ -313,8 +453,8 @@ export const getBlockTransactions = async (
   blockId: string,
   searchCriteria?: {
     ids?: string[];
-    fromParticipantId?: string;
-    toParticipantId?: string;
+    fromId?: string;
+    toId?: string;
     type?: string;
   }
 ): Promise<{ count: number; rows: BlockTransaction<TransactionDetails>[] }> => {
@@ -341,27 +481,36 @@ export const getBlockTransactions = async (
       rows.map(async (model) => {
         const dbTransaction = model.get();
 
-        const fromParticipant = (await getParticipantById(
+        const fromParticipant: Participant = await getFromParticipant(
+          dbTransaction,
+          dbClient
+        );
+        const fromOrganization: Organization = await getFromOrganization(
+          dbTransaction,
+          dbClient
+        );
+        const toParticipant: Participant = await getToParticipant(
+          dbTransaction,
+          dbClient
+        );
+        const toOrganization: Organization = await getToOrganization(
+          dbTransaction,
+          dbClient
+        );
+        const block: Block = await getBlock(dbClient, dbTransaction);
+        const participantKey: ParticipantKey = await getParticipantKey(
           dbClient,
-          dbTransaction.fromParticipantId
-        )) as Participant | undefined;
-
-        const toParticipant = (await getParticipantById(
-          dbClient,
-          dbTransaction.toParticipantId
-        )) as Participant;
-
-        const block = (await getBlockById(
-          dbClient,
-          dbTransaction.blockId,
-          true
-        )) as Block;
+          dbTransaction
+        );
 
         return mapBlockTransaction(
           dbTransaction,
           fromParticipant,
+          fromOrganization,
           toParticipant,
-          block
+          toOrganization,
+          block,
+          participantKey
         );
       })
     ),
@@ -384,25 +533,40 @@ export const createPendingTransaction = async (
     id: newPendingTransaction.id || v4(),
     state: "pending",
     type: _.toLower(newPendingTransaction.type),
-    toParticipantId: newPendingTransaction.to.id,
-    fromParticipantId: newPendingTransaction.from?.id,
-    details: JSON.stringify(newPendingTransaction.details),
+    toParticipantId: newPendingTransaction.toParticipant?.id,
+    toOrganizationId: newPendingTransaction.toOrganization?.id,
+    fromParticipantId: newPendingTransaction.fromParticipant?.id,
+    fromOrganizationId: newPendingTransaction.fromOrganization?.id,
+    details: newPendingTransaction.details,
     description: newPendingTransaction.description,
   });
 
   const dbTransaction = model.get();
 
-  const fromParticipant = (await getParticipantById(
-    dbClient,
-    dbTransaction.fromParticipantId
-  )) as Participant | undefined;
+  const fromParticipant: Participant = await getFromParticipant(
+    dbTransaction,
+    dbClient
+  );
+  const fromOrganization: Organization = await getFromOrganization(
+    dbTransaction,
+    dbClient
+  );
+  const toParticipant: Participant = await getToParticipant(
+    dbTransaction,
+    dbClient
+  );
+  const toOrganization: Organization = await getToOrganization(
+    dbTransaction,
+    dbClient
+  );
 
-  const toParticipant = (await getParticipantById(
-    dbClient,
-    dbTransaction.toParticipantId
-  )) as Participant;
-
-  return mapPendingTransaction(dbTransaction, fromParticipant, toParticipant);
+  return mapPendingTransaction(
+    dbTransaction,
+    fromParticipant,
+    fromOrganization,
+    toParticipant,
+    toOrganization
+  );
 };
 
 export const updatePendingTransaction = async (
@@ -421,7 +585,7 @@ export const updatePendingTransaction = async (
 
   await transactionModel.update(
     {
-      details: JSON.stringify(details),
+      details,
     },
     {
       where: {
@@ -450,6 +614,7 @@ export const createSignedTransaction = async (
     {
       state: "signed",
       signature,
+      participantKeyId: newSignedTransaction.participantKey.id,
       goodPoints,
     },
     {
@@ -466,19 +631,37 @@ export const createSignedTransaction = async (
     return;
   }
 
-  const dbTransaction = model.get();
+  const dbTransaction: TransactionInstance = model.get();
 
-  const fromParticipant = (await getParticipantById(
+  const fromParticipant: Participant = await getFromParticipant(
+    dbTransaction,
+    dbClient
+  );
+  const fromOrganization: Organization = await getFromOrganization(
+    dbTransaction,
+    dbClient
+  );
+  const toParticipant: Participant = await getToParticipant(
+    dbTransaction,
+    dbClient
+  );
+  const toOrganization: Organization = await getToOrganization(
+    dbTransaction,
+    dbClient
+  );
+  const participantKey: ParticipantKey = await getParticipantKey(
     dbClient,
-    dbTransaction.fromParticipantId
-  )) as Participant | undefined;
+    dbTransaction
+  );
 
-  const toParticipant = (await getParticipantById(
-    dbClient,
-    dbTransaction.toParticipantId
-  )) as Participant;
-
-  return mapSignedTransaction(dbTransaction, fromParticipant, toParticipant);
+  return mapSignedTransaction(
+    dbTransaction,
+    fromParticipant,
+    fromOrganization,
+    toParticipant,
+    toOrganization,
+    participantKey
+  );
 };
 
 export const updateSignedTransaction = async (

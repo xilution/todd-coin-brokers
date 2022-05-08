@@ -1,4 +1,5 @@
 import { Model } from "sequelize";
+import { TransactionDetails } from "@xilution/todd-coin-types";
 
 export interface OrganizationParticipantRef {
   id?: string;
@@ -6,6 +7,8 @@ export interface OrganizationParticipantRef {
   updatedAt?: string;
   organizationId: string;
   participantId: string;
+  isAuthorizedSigner: boolean;
+  isAdministrator: boolean;
 }
 
 export interface NodeInstance extends Model {
@@ -52,6 +55,8 @@ export interface OrganizationParticipantRefInstance extends Model {
   updatedAt: string;
   organizationId: string;
   participantId: string;
+  isAuthorizedSigner: boolean;
+  isAdministrator: boolean;
 }
 
 export interface TransactionInstance extends Model {
@@ -62,11 +67,14 @@ export interface TransactionInstance extends Model {
   type: string;
   blockId: string;
   fromParticipantId: string;
+  fromOrganizationId: string;
   toParticipantId: string;
+  toOrganizationId: string;
   goodPoints: number;
   description: string;
-  details: string;
+  details: TransactionDetails;
   signature: string;
+  participantKeyId: string;
 }
 
 export interface BlockInstance extends Model {

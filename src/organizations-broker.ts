@@ -4,9 +4,9 @@ import { v4 } from "uuid";
 import { OrganizationInstance, OrganizationParticipantRef } from "./types";
 import { Model } from "sequelize";
 import { buildWhere } from "./broker-utils";
-import { getOrganizationParticipantRefByOrganizationId } from "./organization-participant-refs-broker";
 import { DEFAULT_PAGE_SIZE } from "@xilution/todd-coin-constants";
 import { getParticipants } from "./participants-broker";
+import { getOrganizationParticipantRefs } from "./organization-participant-refs-broker";
 
 const map = (dbOrganization: OrganizationInstance): Organization => ({
   id: dbOrganization.id,
@@ -22,10 +22,9 @@ const appendRelations = async (
   dbOrganization: OrganizationInstance
 ) => {
   const getOrganizationParticipantRefResponse =
-    await getOrganizationParticipantRefByOrganizationId(
-      dbClient,
-      dbOrganization.id
-    );
+    await getOrganizationParticipantRefs(dbClient, 0, DEFAULT_PAGE_SIZE, {
+      organizationId: dbOrganization.id,
+    });
 
   const participantsResponse = await getParticipants(
     dbClient,

@@ -5,6 +5,7 @@ import {
   OrganizationParticipantRefInstance,
 } from "./types";
 import { Model } from "sequelize";
+import { buildWhere } from "./broker-utils";
 
 const map = (
   dbOrganizationParticipantRef: OrganizationParticipantRefInstance
@@ -14,6 +15,8 @@ const map = (
   updatedAt: dbOrganizationParticipantRef.updatedAt,
   organizationId: dbOrganizationParticipantRef.organizationId,
   participantId: dbOrganizationParticipantRef.participantId,
+  isAuthorizedSigner: dbOrganizationParticipantRef.isAuthorizedSigner,
+  isAdministrator: dbOrganizationParticipantRef.isAdministrator,
 });
 
 export const getOrganizationParticipantRefById = async (
@@ -40,68 +43,17 @@ export const getOrganizationParticipantRefById = async (
   return map(dbOrganizationParticipantRef);
 };
 
-export const getOrganizationParticipantRefByParticipantId = async (
-  dbClient: DbClient,
-  participantId: string
-): Promise<{ count: number; rows: OrganizationParticipantRef[] }> => {
-  const organizationParticipantRefModel =
-    dbClient.sequelize?.models.OrganizationParticipantRef;
-
-  if (organizationParticipantRefModel === undefined) {
-    return { count: 0, rows: [] };
-  }
-
-  const { count, rows } = await organizationParticipantRefModel.findAndCountAll(
-    {
-      where: {
-        participantId,
-      },
-    }
-  );
-
-  return {
-    count,
-    rows: rows.map((model: Model<OrganizationParticipantRefInstance>) => {
-      const dbOrganizationParticipantRef = model.get();
-
-      return map(dbOrganizationParticipantRef);
-    }),
-  };
-};
-
-export const getOrganizationParticipantRefByOrganizationId = async (
-  dbClient: DbClient,
-  organizationId: string
-): Promise<{ count: number; rows: OrganizationParticipantRef[] }> => {
-  const organizationParticipantRefModel =
-    dbClient.sequelize?.models.OrganizationParticipantRef;
-
-  if (organizationParticipantRefModel === undefined) {
-    return { count: 0, rows: [] };
-  }
-
-  const { count, rows } = await organizationParticipantRefModel.findAndCountAll(
-    {
-      where: {
-        organizationId,
-      },
-    }
-  );
-
-  return {
-    count,
-    rows: rows.map((model: Model<OrganizationParticipantRefInstance>) => {
-      const dbOrganizationParticipantRef = model.get();
-
-      return map(dbOrganizationParticipantRef);
-    }),
-  };
-};
-
 export const getOrganizationParticipantRefs = async (
   dbClient: DbClient,
   pageNumber: number,
-  pageSize: number
+  pageSize: number,
+  searchCriteria?: {
+    ids?: string[];
+    organizationId?: string;
+    participantId?: string;
+    isAuthorizedSigner?: boolean;
+    isAdministrator?: boolean;
+  }
 ): Promise<{ count: number; rows: OrganizationParticipantRef[] }> => {
   const organizationParticipantRefModel =
     dbClient.sequelize?.models.OrganizationParticipantRef;
@@ -112,6 +64,7 @@ export const getOrganizationParticipantRefs = async (
 
   const { count, rows } = await organizationParticipantRefModel.findAndCountAll(
     {
+      where: buildWhere(searchCriteria),
       offset: pageNumber * pageSize,
       order: [["createdAt", "DESC"]],
       limit: pageSize,

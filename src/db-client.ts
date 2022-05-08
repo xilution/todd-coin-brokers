@@ -64,6 +64,10 @@ export class DbClient {
           type: DataTypes.ARRAY(DataTypes.STRING),
           allowNull: false,
         },
+        domains: {
+          type: DataTypes.ARRAY(DataTypes.STRING),
+          allowNull: true,
+        },
       },
       {
         tableName: "organizations",
@@ -156,6 +160,16 @@ export class DbClient {
           allowNull: false,
           primaryKey: true,
         },
+        isAuthorizedSigner: {
+          type: DataTypes.BOOLEAN,
+          allowNull: false,
+          defaultValue: false,
+        },
+        isAdministrator: {
+          type: DataTypes.BOOLEAN,
+          allowNull: false,
+          defaultValue: false,
+        },
       },
       {
         tableName: "organization-participant-refs",
@@ -184,13 +198,21 @@ export class DbClient {
           type: DataTypes.STRING,
           allowNull: true,
         },
-        fromParticipantId: {
+        fromParticipant: {
           type: DataTypes.STRING,
           allowNull: true,
         },
-        toParticipantId: {
+        fromOrganization: {
           type: DataTypes.STRING,
-          allowNull: false,
+          allowNull: true,
+        },
+        toParticipant: {
+          type: DataTypes.STRING,
+          allowNull: true,
+        },
+        toOrganization: {
+          type: DataTypes.STRING,
+          allowNull: true,
         },
         goodPoints: {
           type: DataTypes.BIGINT,
@@ -201,8 +223,12 @@ export class DbClient {
           allowNull: false,
         },
         details: {
-          type: DataTypes.STRING,
+          type: DataTypes.JSONB,
           allowNull: false,
+        },
+        participantKeyId: {
+          type: DataTypes.STRING,
+          allowNull: true,
         },
         signature: {
           type: DataTypes.STRING,

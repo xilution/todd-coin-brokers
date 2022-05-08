@@ -7,7 +7,7 @@ import { getParticipantKeys } from "./participant-keys-broker";
 import { buildWhere } from "./broker-utils";
 import { DEFAULT_PAGE_SIZE } from "@xilution/todd-coin-constants";
 import { getOrganizations } from "./organizations-broker";
-import { getOrganizationParticipantRefByParticipantId } from "./organization-participant-refs-broker";
+import { getOrganizationParticipantRefs } from "./organization-participant-refs-broker";
 
 const map = (
   dbParticipant: ParticipantInstance
@@ -36,10 +36,9 @@ const appendRelations = async (
   );
 
   const getOrganizationParticipantRefResponse =
-    await getOrganizationParticipantRefByParticipantId(
-      dbClient,
-      dbParticipant.id
-    );
+    await getOrganizationParticipantRefs(dbClient, 0, DEFAULT_PAGE_SIZE, {
+      participantId: dbParticipant.id,
+    });
 
   const organizationsResponse = await getOrganizations(
     dbClient,

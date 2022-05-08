@@ -188,17 +188,17 @@ export const createBlock = async (
         id: v4(),
         state: "signed",
         type: _.toLower(TransactionType.TIME),
-        toParticipantId: minerParticipantId,
+        toId: minerParticipantId,
         goodPoints: MINING_REWARD,
         description: "Mining reward",
-        details: JSON.stringify({
+        details: {
           dateRanges: [
             {
               from: now.toISOString(),
               to: now.toISOString(),
             },
           ],
-        }),
+        },
       });
     }
 
