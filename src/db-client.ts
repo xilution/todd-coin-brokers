@@ -37,6 +37,7 @@ export class DbClient {
         baseUrl: {
           type: DataTypes.STRING,
           allowNull: false,
+          unique: true,
         },
       },
       {
@@ -55,6 +56,7 @@ export class DbClient {
         name: {
           type: DataTypes.STRING,
           allowNull: false,
+          unique: true,
         },
         email: {
           type: DataTypes.STRING,
@@ -82,11 +84,12 @@ export class DbClient {
           allowNull: false,
           primaryKey: true,
         },
-        participantId: {
+        publicKey: {
           type: DataTypes.STRING,
           allowNull: false,
+          unique: true,
         },
-        publicKey: {
+        participantId: {
           type: DataTypes.STRING,
           allowNull: false,
         },
@@ -115,6 +118,7 @@ export class DbClient {
         email: {
           type: DataTypes.STRING,
           allowNull: false,
+          unique: true,
         },
         password: {
           type: DataTypes.STRING,
@@ -198,19 +202,19 @@ export class DbClient {
           type: DataTypes.STRING,
           allowNull: true,
         },
-        fromParticipant: {
+        fromParticipantId: {
           type: DataTypes.STRING,
           allowNull: true,
         },
-        fromOrganization: {
+        fromOrganizationId: {
           type: DataTypes.STRING,
           allowNull: true,
         },
-        toParticipant: {
+        toParticipantId: {
           type: DataTypes.STRING,
           allowNull: true,
         },
-        toOrganization: {
+        toOrganizationId: {
           type: DataTypes.STRING,
           allowNull: true,
         },
