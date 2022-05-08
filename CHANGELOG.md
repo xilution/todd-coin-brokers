@@ -1,3 +1,16 @@
+# [5.1.0](https://github.com/xilution/todd-coin-brokers/compare/v5.0.0...v5.1.0) (2022-05-08)
+
+
+### Bug Fixes
+
+* fixed transaction properties and set unique fields ([6c38804](https://github.com/xilution/todd-coin-brokers/commit/6c38804e7dffd036cacddbda27fa31267968b573))
+
+
+### Features
+
+* bumped todd-coin-constants and todd-coin-utils versions ([2192b51](https://github.com/xilution/todd-coin-brokers/commit/2192b515a6f9ce8647b1687d426a32ed7ba47080))
+* updated create block ([4237f28](https://github.com/xilution/todd-coin-brokers/commit/4237f28fc8830937820cb5147ba2efd286d4a38a))
+
 # [5.0.0](https://github.com/xilution/todd-coin-brokers/compare/v4.0.2...v5.0.0) (2022-05-08)
 
 
