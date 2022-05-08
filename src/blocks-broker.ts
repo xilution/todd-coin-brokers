@@ -1,6 +1,7 @@
 import {
   Block,
   BlockTransaction,
+  DateRange,
   TransactionDetails,
   TransactionType,
 } from "@xilution/todd-coin-types";
@@ -9,6 +10,7 @@ import { v4 } from "uuid";
 import {
   MAX_TRANSACTIONS_PER_BLOCK,
   MINING_REWARD,
+  TODD_COIN_ORGANIZATION_ID,
 } from "@xilution/todd-coin-constants";
 import { getBlockTransactions } from "./transactions-broker";
 import { BlockInstance } from "./types";
@@ -143,7 +145,8 @@ export const getBlocks = async (
 export const createBlock = async (
   dbClient: DbClient,
   newBlock: Block,
-  minerParticipantId?: string
+  minerParticipantId?: string,
+  duration?: DateRange
 ): Promise<Block | undefined> => {
   return await dbClient.transaction<Block | undefined>(async () => {
     const blockModel = dbClient.sequelize?.models.Block;
@@ -181,24 +184,20 @@ export const createBlock = async (
       )
     );
 
-    const now = dayjs();
-
     if (minerParticipantId !== undefined) {
       await transactionModel.create({
         id: v4(),
-        state: "signed",
+        state: "pending",
         type: _.toLower(TransactionType.TIME),
-        toId: minerParticipantId,
+        fromParticipantId: minerParticipantId,
+        toOrganizationId: TODD_COIN_ORGANIZATION_ID,
         goodPoints: MINING_REWARD,
         description: "Mining reward",
-        details: {
-          dateRanges: [
-            {
-              from: now.toISOString(),
-              to: now.toISOString(),
-            },
-          ],
-        },
+        details: duration
+          ? {
+              dateRanges: [duration],
+            }
+          : {},
       });
     }
 
