@@ -16,7 +16,6 @@ import { getBlockTransactions } from "./transactions-broker";
 import { BlockInstance } from "./types";
 import { Model } from "sequelize";
 import _ from "lodash";
-import dayjs from "dayjs";
 import { buildWhere } from "./broker-utils";
 
 const map = (dbBlock: BlockInstance): Block => ({
