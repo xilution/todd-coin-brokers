@@ -31,8 +31,8 @@
   "main": "./dist/index.js",
   "types": "dist/index.d.ts",
   "dependencies": {
-    "@xilution/todd-coin-constants": "^2.0.0",
-    "@xilution/todd-coin-utils": "^7.0.1",
+    "@xilution/todd-coin-constants": "^2.1.0",
+    "@xilution/todd-coin-utils": "^7.2.0",
     "dayjs": "^1.11.1",
     "lodash": "^4.17.21",
     "pg": "^8.7.3",
