@@ -1,3 +1,10 @@
+# [5.2.0](https://github.com/xilution/todd-coin-brokers/compare/v5.1.1...v5.2.0) (2022-05-09)
+
+
+### Features
+
+* removed good points from mining reward ([5b05e5d](https://github.com/xilution/todd-coin-brokers/commit/5b05e5d6391c8d22104aec0759aa644a3b49ea44))
+
 ## [5.1.1](https://github.com/xilution/todd-coin-brokers/compare/v5.1.0...v5.1.1) (2022-05-09)
 
 
