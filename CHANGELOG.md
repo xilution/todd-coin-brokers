@@ -1,3 +1,10 @@
+## [5.1.1](https://github.com/xilution/todd-coin-brokers/compare/v5.1.0...v5.1.1) (2022-05-09)
+
+
+### Bug Fixes
+
+* fixed mining from and to ([ed66f18](https://github.com/xilution/todd-coin-brokers/commit/ed66f1800dc798cb9a6a321db61229c26d1e9862))
+
 # [5.1.0](https://github.com/xilution/todd-coin-brokers/compare/v5.0.0...v5.1.0) (2022-05-08)
 
 
