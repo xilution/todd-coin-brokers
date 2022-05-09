@@ -188,8 +188,8 @@ export const createBlock = async (
         id: v4(),
         state: "pending",
         type: _.toLower(TransactionType.TIME),
-        fromParticipantId: minerParticipantId,
-        toOrganizationId: TODD_COIN_ORGANIZATION_ID,
+        fromOrganizationId: TODD_COIN_ORGANIZATION_ID,
+        toParticipantId: minerParticipantId,
         goodPoints: MINING_REWARD,
         description: "Mining reward",
         details: duration
