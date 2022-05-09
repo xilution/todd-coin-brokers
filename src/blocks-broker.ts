@@ -9,7 +9,6 @@ import { DbClient } from "./db-client";
 import { v4 } from "uuid";
 import {
   MAX_TRANSACTIONS_PER_BLOCK,
-  MINING_REWARD,
   TODD_COIN_ORGANIZATION_ID,
 } from "@xilution/todd-coin-constants";
 import { getBlockTransactions } from "./transactions-broker";
