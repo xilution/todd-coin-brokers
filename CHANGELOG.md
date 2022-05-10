@@ -1,3 +1,10 @@
+# [5.3.0](https://github.com/xilution/todd-coin-brokers/compare/v5.2.0...v5.3.0) (2022-05-10)
+
+
+### Features
+
+* moved todd-coin-types back to deps ([2e792d4](https://github.com/xilution/todd-coin-brokers/commit/2e792d47848e37fb319ba35d387ae322d5dc1adc))
+
 # [5.2.0](https://github.com/xilution/todd-coin-brokers/compare/v5.1.1...v5.2.0) (2022-05-09)
 
 
