@@ -1,3 +1,10 @@
+# [5.4.0](https://github.com/xilution/todd-coin-brokers/compare/v5.3.0...v5.4.0) (2022-05-11)
+
+
+### Features
+
+* added updateOrganizationParticipantRef to organizationParticipantRefsBroker ([294b0b5](https://github.com/xilution/todd-coin-brokers/commit/294b0b56e688f2a5aa5366054d92b11af091b964))
+
 # [5.3.0](https://github.com/xilution/todd-coin-brokers/compare/v5.2.0...v5.3.0) (2022-05-10)
 
 
