@@ -128,3 +128,41 @@ export const deleteOrganizationParticipantRef = async (
     },
   });
 };
+
+export const updateOrganizationParticipantRef = async (
+  dbClient: DbClient,
+  updatedOrganizationParticipantRef: OrganizationParticipantRef
+): Promise<void> => {
+  const organizationParticipantRefModel =
+    dbClient.sequelize?.models.OrganizationParticipantRef;
+
+  if (organizationParticipantRefModel === undefined) {
+    throw new Error(
+      "unable to update an organization participant reference because the organization participant reference model is undefined"
+    );
+  }
+
+  const {
+    id,
+    organizationId,
+    participantId,
+    isAuthorizedSigner,
+    isAdministrator,
+  } = updatedOrganizationParticipantRef;
+
+  await organizationParticipantRefModel.update(
+    {
+      isAuthorizedSigner,
+      isAdministrator,
+    },
+    {
+      where: {
+        id,
+        organizationId,
+        participantId,
+      },
+    }
+  );
+
+  return;
+};
