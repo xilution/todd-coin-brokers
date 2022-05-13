@@ -34,13 +34,56 @@ const appendRelations = async (
     {
       ids: getOrganizationParticipantRefResponse.rows.reduce(
         (ids: string[], row: OrganizationParticipantRef) =>
-          row.id ? ids.concat(row.id) : ids,
+          row.participantId ? ids.concat(row.participantId) : ids,
         []
       ),
     }
   );
 
-  return { ...map(dbOrganization), participants: participantsResponse.rows };
+  const getOrganizationAuthorizedSignerRefResponse =
+    await getOrganizationParticipantRefs(dbClient, 0, DEFAULT_PAGE_SIZE, {
+      organizationId: dbOrganization.id,
+      isAuthorizedSigner: true,
+    });
+
+  const authorizedSignersResponse = await getParticipants(
+    dbClient,
+    0,
+    DEFAULT_PAGE_SIZE,
+    {
+      ids: getOrganizationAuthorizedSignerRefResponse.rows.reduce(
+        (ids: string[], row: OrganizationParticipantRef) =>
+          row.participantId ? ids.concat(row.participantId) : ids,
+        []
+      ),
+    }
+  );
+
+  const getOrganizationAdministratorRefResponse =
+    await getOrganizationParticipantRefs(dbClient, 0, DEFAULT_PAGE_SIZE, {
+      organizationId: dbOrganization.id,
+      isAdministrator: true,
+    });
+
+  const administratorsResponse = await getParticipants(
+    dbClient,
+    0,
+    DEFAULT_PAGE_SIZE,
+    {
+      ids: getOrganizationAdministratorRefResponse.rows.reduce(
+        (ids: string[], row: OrganizationParticipantRef) =>
+          row.participantId ? ids.concat(row.participantId) : ids,
+        []
+      ),
+    }
+  );
+
+  return {
+    ...map(dbOrganization),
+    participants: participantsResponse.rows,
+    authorizedSigners: authorizedSignersResponse.rows,
+    administrators: administratorsResponse.rows,
+  };
 };
 
 export const getOrganizationById = async (
