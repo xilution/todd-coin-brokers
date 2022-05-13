@@ -118,6 +118,7 @@ export const createOrganization = async (
     name: newOrganization.name,
     email: newOrganization.email,
     roles: newOrganization.roles,
+    domains: newOrganization.domains,
   });
 
   const dbOrganization = model.get();

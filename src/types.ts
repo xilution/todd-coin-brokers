@@ -25,6 +25,7 @@ export interface OrganizationInstance extends Model {
   name: string;
   email: string;
   roles: string[];
+  domains: string[];
 }
 
 export interface ParticipantKeyInstance extends Model {
