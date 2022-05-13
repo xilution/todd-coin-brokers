@@ -1,3 +1,19 @@
+# [5.5.0](https://github.com/xilution/todd-coin-brokers/compare/v5.4.0...v5.5.0) (2022-05-13)
+
+
+### Bug Fixes
+
+* added domains to OrganizationInstance ([5570a7e](https://github.com/xilution/todd-coin-brokers/commit/5570a7e694b651a1fb6a0b86fb029867474b9591))
+* added domains to OrganizationInstance to Organization map ([bdf7b33](https://github.com/xilution/todd-coin-brokers/commit/bdf7b33babc1b8c5433dd1f072b6a12e146890d8))
+* added isAuthorizedSigner and isAdministrator to db record create ([97ea0d0](https://github.com/xilution/todd-coin-brokers/commit/97ea0d0690bfdecabc5bd5f5e2da50da5239a13f))
+* added response type to organizations-broker.ts appendRelations function ([0f4b764](https://github.com/xilution/todd-coin-brokers/commit/0f4b764ccee636ca6048c2adbec82baf8840140b))
+* added response type to participant-keys-broker.ts appendRelations ([c4439c2](https://github.com/xilution/todd-coin-brokers/commit/c4439c2a9e619a199764695c63c5240ac825aa0a))
+
+
+### Features
+
+* added authorizedSigners and administrators to organization response ([3ef43ef](https://github.com/xilution/todd-coin-brokers/commit/3ef43efb3f5672c6bf9bc07985f899ef6c7f55f8))
+
 # [5.4.0](https://github.com/xilution/todd-coin-brokers/compare/v5.3.0...v5.4.0) (2022-05-11)
 
 
