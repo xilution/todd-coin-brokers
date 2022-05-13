@@ -20,7 +20,7 @@ const map = (dbOrganization: OrganizationInstance): Organization => ({
 const appendRelations = async (
   dbClient: DbClient,
   dbOrganization: OrganizationInstance
-) => {
+): Promise<Organization> => {
   const getOrganizationParticipantRefResponse =
     await getOrganizationParticipantRefs(dbClient, 0, DEFAULT_PAGE_SIZE, {
       organizationId: dbOrganization.id,
