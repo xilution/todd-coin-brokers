@@ -15,6 +15,7 @@ const map = (dbOrganization: OrganizationInstance): Organization => ({
   name: dbOrganization.name,
   email: dbOrganization.email,
   roles: dbOrganization.roles as OrganizationRole[],
+  domains: dbOrganization.domains,
 });
 
 const appendRelations = async (
