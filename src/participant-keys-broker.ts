@@ -21,7 +21,7 @@ const map = (dbParticipantKey: ParticipantKeyInstance): ParticipantKey => ({
 const appendRelations = async (
   dbClient: DbClient,
   dbParticipantKey: ParticipantKeyInstance
-) => {
+): Promise<ParticipantKey> => {
   const participant = await getParticipantById(
     dbClient,
     dbParticipantKey.participantId,
