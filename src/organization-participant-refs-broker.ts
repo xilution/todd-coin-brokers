@@ -98,6 +98,8 @@ export const createOrganizationParticipantRef = async (
     id: newOrganizationParticipantRef.id || v4(),
     organizationId: newOrganizationParticipantRef.organizationId,
     participantId: newOrganizationParticipantRef.participantId,
+    isAuthorizedSigner: newOrganizationParticipantRef.isAuthorizedSigner,
+    isAdministrator: newOrganizationParticipantRef.isAdministrator,
   });
 
   const dbOrganizationParticipantRef = model.get();
