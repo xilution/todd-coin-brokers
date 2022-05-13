@@ -88,8 +88,6 @@ export const createOrganizationParticipantRef = async (
   const organizationParticipantRefModel =
     dbClient.sequelize?.models.OrganizationParticipantRef;
 
-  // todo - watch for dupes
-
   if (organizationParticipantRefModel === undefined) {
     throw new Error(
       "unable to create an organization participant reference because the organization participant reference model is undefined"
